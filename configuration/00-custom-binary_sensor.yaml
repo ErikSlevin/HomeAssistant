@@ -1,0 +1,75 @@
+# ---- PING-Plattform 
+
+## [Ping] Fernseher
+## LG B9
+- platform: ping
+  host: !secret ip_fernseher
+  name: "Fernseher"
+  count: 2
+  scan_interval: 3
+
+## [Ping] NAS
+## Synology Diskstation DS214play
+- platform: ping
+  host: !secret ip_diskstation
+  name: "Diskstation"
+  count: 2
+  scan_interval: 15
+ 
+# ---- Template-Plattform 
+- platform: template
+  sensors:
+
+    ## [Allgemein] Anwesenheitserkennung
+    ## True, wenn keiner Zuhause ist
+    anwesend:
+      friendly_name: "Jemand Zuhause"
+      value_template: "{{is_state('person.erik','home')}}"
+
+    ## [Staubsauger] Heute noch nicht gereinigt
+    ## True, wenn heute noch nicht gereinigt wurde (auch keine kurze Küchenreinigung)
+    staubsauger_heute_reinigung_notwendig:
+      friendly_name: "Heute Reinigung notwendig"
+      icon_template: >-
+        {% if is_state('binary_sensor.staubsauger_heute_reinigung_notwendig','on') %} mdi:circle-slice-8
+        {% else %} mdi:circle-outline
+        {% endif %}      
+      value_template: >-
+        {% set letzte_reinigung = as_timestamp(states('sensor.roborock_vacuum_a10_last_clean_start')) | timestamp_custom('%d.%m.%Y') %}
+        {% set kueche_reinigung = as_timestamp(state_attr('automation.kuche_staubsaugen','last_triggered')) | timestamp_custom('%d.%m.%Y') %}
+        {% set automatische_reinigung =  as_timestamp(state_attr('automation.staubsaugen','last_triggered')) | timestamp_custom('%d.%m.%Y') %}
+        {% set heute = as_timestamp(now()) | timestamp_custom('%d.%m.%Y') %}
+        {% if letzte_reinigung != heute %} {{ true }}
+        {% elif (kueche_reinigung == heute) and (automatische_reinigung != heute) %} {{ true }}
+        {% else %} {{ false }}
+        {% endif %}
+
+    ## [Staubsauger] Staubbehälter entleeren
+    ## True, wenn 'Anzahl der Gesamtreinigungen' / '(Helfer) Nach Reinigungen leeren' = Rest 0
+    staubsauger_entleeren:
+      friendly_name: "Behälter entleeren"
+      icon_template: >-
+        {% if is_state('binary_sensor.staubsauger_entleeren','on') %} mdi:circle-slice-8
+        {% else %} mdi:circle-outline
+        {% endif %}         
+      value_template: >-
+        {% set rest = states('sensor.roborock_vacuum_a10_total_clean_count') | int % states('input_number.staubsauger_entleeren') | int %}
+        {% if rest == 0 %} {{ true }}
+        {% else %} {{ false }}
+        {% endif %}
+
+    ## [Staubsauger] Zwangsreinigung
+    ## True, wenn letzte Reinigung in Tagen zu lange zurück liegt
+    staubsauger_zwangsreinigung:
+      friendly_name: "Zwangsreinigung"
+      icon_template: >-
+        {% if is_state('binary_sensor.staubsauger_zwangsreinigung','on') %} mdi:circle-slice-8
+        {% else %} mdi:circle-outline
+        {% endif %} 
+      value_template: >-              
+        {% set letzte_reinigung = states('sensor.roborock_vacuum_a10_last_clean_start') %}
+        {% set zwangsreinigung = states('input_number.nach_tagen_reinigen') | int %}
+        {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
+        {% if zwangsreinigung <= now() %} {{ true }}
+        {% else %} {{ false }}
+        {% endif %}        

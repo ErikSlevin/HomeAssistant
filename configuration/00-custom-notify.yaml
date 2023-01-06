@@ -1,0 +1,15 @@
+## [Benachrichtigung] Gotify
+## Verbindung zum Self-Hosted Notification Dienst (Docker-Container)
+- name: gotify
+  platform: rest
+  resource: !secret gotify_url
+  method: POST_JSON
+  headers: 
+    X-Gotify-Key: !secret gotify_key
+  message_param_name: message
+  title_param_name: title
+  data:
+    priority: 6
+    extras:
+      client::display:
+        contentType: "text/markdown"

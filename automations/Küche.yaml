@@ -1,0 +1,93 @@
+id: '1661977068386'
+alias: Küche
+description: 'Einfacher Tastendruck: Licht in der Küche wird An/Aus geschaltet.
+  Langer Tastendruck: Spotify Playlist wird abgespielt.'
+trigger:
+- platform: device
+  device_id: e63d7afbcf7e0943762c75cef2332a73
+  domain: shelly
+  type: single_push
+  subtype: button1
+  id: On/Off
+- platform: device
+  device_id: e63d7afbcf7e0943762c75cef2332a73
+  domain: shelly
+  type: long_push
+  subtype: button1
+  id: Musik
+condition: []
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: On/Off
+    sequence:
+    - type: toggle
+      device_id: 57f5ff61c232c7b17260ce91834d2320
+      entity_id: switch.kuche_licht
+      domain: switch
+  - conditions:
+    - condition: trigger
+      id: Musik
+    sequence:
+    - choose:
+      - conditions:
+        - condition: or
+          conditions:
+          - condition: device
+            device_id: d4ca3c37c7262ab00aebe569650ad102
+            domain: media_player
+            entity_id: media_player.wohnzimmer
+            type: is_idle
+          - condition: device
+            device_id: d4ca3c37c7262ab00aebe569650ad102
+            domain: media_player
+            entity_id: media_player.wohnzimmer
+            type: is_paused
+          - condition: device
+            device_id: d4ca3c37c7262ab00aebe569650ad102
+            domain: media_player
+            entity_id: media_player.wohnzimmer
+            type: is_off
+        sequence:
+        - service: media_player.volume_set
+          data:
+            volume_level: 0.45
+          target:
+            entity_id: media_player.wohnzimmer
+        - service: media_player.play_media
+          target:
+            entity_id: media_player.mass_wohnzimmer
+          data:
+            media_content_id: media-source://mass/database://playlist/1
+            media_content_type: audio/flac
+          metadata:
+            title: Club Beats
+            thumbnail: https://images.weserv.nl/?w=200&url=https://i.scdn.co/image/ab67706f00000003fc4864fba215a717cb3cae5c
+            media_class: playlist
+            children_media_class:
+            navigateIds:
+            - {}
+            - media_content_type: app
+              media_content_id: media-source://mass
+            - media_content_type: music
+              media_content_id: media-source://mass/playlists
+        - service: media_player.shuffle_set
+          target:
+            entity_id: media_player.mass_wohnzimmer
+          data:
+            shuffle: true
+      - conditions:
+        - condition: device
+          device_id: d4ca3c37c7262ab00aebe569650ad102
+          domain: media_player
+          entity_id: media_player.wohnzimmer
+          type: is_playing
+        sequence:
+        - service: media_player.media_stop
+          data: {}
+          target:
+            entity_id: media_player.wohnzimmer
+      default: []
+  default: []
+mode: single

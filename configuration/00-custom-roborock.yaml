@@ -1,0 +1,23 @@
+## [Staubsauger] Custom Card
+## Anzeige der Karte im Lovelance UI
+- platform: xiaomi_cloud_map_extractor
+  host: !secret roborock_vacuum_host
+  token: !secret roborock_vacuum_token
+  username: !secret roborock_cloud_username
+  password: !secret roborock_cloud_password
+  attributes:
+    - calibration_points
+    - rooms
+  country: "de"
+  colors:
+    color_map_outside: [28, 28, 28]
+  map_transformation:
+    rotate: 90
+    scale: 1.2
+  room_colors:
+    21: [9, 84, 115]    # Wohnzimmer
+    18: [91, 149, 170]  # Küche
+    20: [52, 155, 144]  # Abstellraum
+    19: [185, 214, 188] # Flur
+    17: [145, 170, 58]  # Büro
+    16: [160, 186, 214] # Schlafzimmer

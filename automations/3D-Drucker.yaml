@@ -1,0 +1,30 @@
+id: '1660433623646'
+alias: 3D-Drucker
+description: 'Wenn der 3D-Drucker eingeschaltet ist: Warte, bis der gemessene Energieverbrauch
+  für 1 Minute unter 15 Watt liegt. Sobald dieser Wert erreicht wurde, sende eine
+  Push-Benachrichtigung via Gotify und schalte den 3D-Druckeraus.'
+trigger:
+- platform: device
+  type: turned_on
+  device_id: 56661d1855347f947a777e4fb31309a0
+  entity_id: switch.tasmota_2
+  domain: switch
+condition: []
+action:
+- wait_for_trigger:
+  - platform: numeric_state
+    entity_id: sensor.tasmota_energy_power_2
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    below: 15
+- service: notify.gotify
+  data:
+    title: 3D Drucker
+    message: Druck um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}} abgeschlossen.
+- type: turn_off
+  device_id: 56661d1855347f947a777e4fb31309a0
+  entity_id: switch.tasmota_2
+  domain: switch
+mode: single

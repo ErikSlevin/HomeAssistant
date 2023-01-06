@@ -1,0 +1,84 @@
+id: '1672901148359'
+alias: TV Beleuchtung
+description: "TV einschalten: wird eingeschaltet und die passende Szene(anhand von
+  einem Sensor) wird eingestellt. Der Übergang wird mithilfe eines Helfers eingestellt.
+  \n\nTV ausschalten: wird ausgeschaltet. Der Übergang wird mithilfe eines Helfers
+  eingestellt.\n\nSzenenwechsel: Wenn der TV eingeschaltet ist, wird bei einem Statuswechsels
+  des Sensors (anhand des Sonnenstandes), die passende Szene ausgewählt und aktiviert
+  bzw. die Beleuchtung ein- oder ausgeschaltet."
+trigger:
+- platform: state
+  entity_id:
+  - binary_sensor.fernseher
+  from: 'off'
+  to: 'on'
+  id: Einschalten
+- platform: state
+  entity_id:
+  - media_player.lg_b9
+  id: Ausschalten
+  to: 'off'
+- platform: state
+  entity_id:
+  - sensor.szenenauswahl
+  id: Szenenwechsel
+condition: []
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: Einschalten
+    - condition: state
+      entity_id: light.tv_licht
+      state: 'off'
+    sequence:
+    - service: scene.turn_on
+      data_template:
+        entity_id: '{{ states(''input_select.szenenauswahl'') }}
+          '
+        transition: '{{ states(''input_number.tv_einschalten_transition'') }}
+          '
+  - conditions:
+    - condition: trigger
+      id: Ausschalten
+    - condition: state
+      entity_id: light.tv_licht
+      state: 'on'
+    sequence:
+    - service: light.turn_off
+      data_template:
+        entity_id: light.tv_licht
+        transition: '{{ states(''input_number.tv_ausschalten_transition'') }}
+          '
+  - conditions:
+    - condition: trigger
+      id: Szenenwechsel
+    - condition: state
+      entity_id: binary_sensor.fernseher
+      state: 'on'
+    sequence:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: sensor.szenenauswahl
+          state: 'off'
+        sequence:
+        - service: light.turn_off
+          data_template:
+            entity_id: light.tv_licht
+            transition: '{{ states(''input_number.tv_ausschalten_transition'') }}
+              '
+      - conditions:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: 'off'
+        sequence:
+        - service: scene.turn_on
+          data_template:
+            entity_id: '{{ states(''input_select.szenenauswahl'') }}
+              '
+            transition: '{{ states(''input_number.tv_umschalten_transition'') }}
+              '
+mode: single

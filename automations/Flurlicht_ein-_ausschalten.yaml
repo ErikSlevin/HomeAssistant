@@ -1,0 +1,56 @@
+id: '1654455377953'
+alias: 'Flurlicht ein-/ausschalten '
+description: 'Wenn jemand Zuhause ist: Wenn Bewegung im Flur erkannt wurde und die
+  Sonne 3° über dem Horizont ist - schalte das Flur Licht ein.
+  Sobald für 15 Sekunden keine Bewegung mehr in Flur detektiert wurde - schalte
+  das Flur Licht wieder aus.'
+trigger:
+- type: motion
+  platform: device
+  device_id: 72c34759065275b239d8d05ff2984fb4
+  entity_id: binary_sensor.flur_motion
+  domain: binary_sensor
+  id: 'ON'
+- type: no_motion
+  platform: device
+  device_id: 72c34759065275b239d8d05ff2984fb4
+  entity_id: binary_sensor.flur_motion
+  domain: binary_sensor
+  id: 'OFF'
+  for:
+    hours: 0
+    minutes: 0
+    seconds: 15
+condition:
+- condition: state
+  entity_id: binary_sensor.anwesend
+  state: 'on'
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: 'ON'
+    - condition: numeric_state
+      entity_id: sun.sun
+      attribute: elevation
+      below: 3
+    sequence:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.flur
+  - conditions:
+    - condition: trigger
+      id: 'OFF'
+    - condition: device
+      type: is_on
+      device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+      entity_id: switch.shellyplus1_441793a3e76c_switch_0
+      domain: switch
+    sequence:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.flur
+  default: []
+mode: single

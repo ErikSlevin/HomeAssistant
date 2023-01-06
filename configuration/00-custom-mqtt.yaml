@@ -1,0 +1,13 @@
+sensor:
+# Docker 1 HW-Monitor
+  - name: "docker-1-monitor"
+    state_topic: "home/nodes/sensor/pi-docker-1/monitor"  
+      
+  - name: "docker-1-temperature"      
+    state_topic: "home/nodes/sensor/pi-docker-1/temperature"
+      
+  - name: "docker-1-disk_used"      
+    state_topic: "home/nodes/sensor/pi-docker-1/disk_used"     
+      
+  - name: "docker-1-cpu_load"      
+    state_topic: "home/nodes/sensor/pi-docker-1/cpu_load"

@@ -1,0 +1,21 @@
+## [Datenbank] Mariadb
+## Verbindung zu einer Self-Hosted Datenbank (Docker-Container)
+db_url: !secret db_connection
+commit_interval: 60
+include:
+  entities:
+    # Wohnzimmer
+    - sensor.wandthermostat_temperature
+    - sensor.wandthermostat_humidity
+    - sensor.wohnzimmer_soll_temperatur
+    - sensor.wohnzimmer_heizungen
+    
+    # Außen
+    - sensor.aussen_temperatur
+    - sensor.aussen_humidity
+    
+    # Stromkosten
+    - sensor.tasmota_energy_total
+    - sensor.tasmota_energy_total_cost
+    - sensor.tasmota_energy_total_2
+    - sensor.tasmota_energy_total_2_cost

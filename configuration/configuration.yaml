@@ -1,0 +1,57 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+lovelace:
+  resources:
+    - url: /hacsfiles/lovelace-multiple-entity-row/multiple-entity-row.js
+      type: module
+      
+# Text to speech
+tts:
+  - platform: google_translate
+
+# Split in einzelne Konfigurationsdateien
+recorder: !include 00-custom-recorder.yaml              # Datenbank
+mqtt: !include 00-custom-mqtt.yaml                      # MQTT
+notify: !include 00-custom-notify.yaml                  # Push-Benachrichtigungen
+camera: !include 00-custom-roborock.yaml                # Roborock
+sensor: !include 00-custom-sensor.yaml                  # Sensor
+binary_sensor: !include 00-custom-binary_sensor.yaml    # Binary-Sensor
+automation: !include automations.yaml                   # Automationen
+script: !include scripts.yaml                           # Skripte
+scene: !include scenes.yaml                             # Szenen
+    
+light:
+light groups: !include 00-custom-light-groups.yaml      # Licht-Gruppen
+light switch: !include 00-custom-light-switch.yaml      # Licht-Schalter
+
+mobile_app:
+
+webostv:
+    host: !secret ip_fernseher
+    name: 'Fernseher'
+    turn_on_action:
+      service: wake_on_lan.send_magic_packet
+      data: 
+        mac: !secret mac_fernseher
+    customize:
+      sources:
+        - Sky
+        - Kodi
+
+switch:
+  - platform: wake_on_lan
+    name: Diskstation
+    host: !secret ip_diskstation
+    mac: !secret mac_diskstation
+
+spotcast:
+  sp_dc: !secret spotcast_dc
+  sp_key: !secret spotcast_key
+  country: DE
+  
+shell_command:
+  # Backups die älter als 14 Tage sind werden gelöscht
+  delete_old_snapshots: find /backup/* -mtime +14 -exec rm {} \;
+ 
+    

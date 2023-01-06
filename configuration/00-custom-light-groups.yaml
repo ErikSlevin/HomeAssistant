@@ -1,0 +1,8 @@
+## [Licht] TV Beleuchtung
+## Fasse die drei Lampen zu einer Gruppe zusammen
+- platform: group
+  name: TV Licht
+  entities:
+    - light.lampe_links
+    - light.lampe_mitte
+    - light.lampe_rechts

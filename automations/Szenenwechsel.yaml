@@ -1,0 +1,17 @@
+id: '1672937116825'
+alias: Szenenwechsel
+description: Wenn der Sensor den Status ändert, wird dieser Wert in den `input_select.szenenauswahl`
+  geschrieben. Zentrale Automation für die einheitliche Licht-Szenen-Steuerung in
+  der Wohnung.
+trigger:
+- platform: state
+  entity_id:
+  - sensor.szenenauswahl
+condition: []
+action:
+- service: input_select.select_option
+  data:
+    option: '{{ states(''sensor.szenenauswahl'') }}'
+  target:
+    entity_id: input_select.szenenauswahl
+mode: single

@@ -1,0 +1,5 @@
+## [Licht] Lichtschalter
+## Manuell erstellter Lichtschalter für den Shelly
+- platform: switch
+  name: Flur
+  entity_id: switch.shellyplus1_441793a3e76c_switch_0
