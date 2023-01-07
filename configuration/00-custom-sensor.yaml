@@ -11,12 +11,11 @@
         {% endif %}  
       value_template: >-
         {% set sonne = state_attr('sun.sun','elevation') %}
-        {% set ausschalten = states('input_number.tv_licht_aus') | float %}
-        {% set umschalten = states('input_number.tv_licht_ubergang') | float %}
-        {% if sonne >= ausschalten %} off
-        {% elif sonne >= umschalten and sonne < ausschalten %} scene.wohnzimmer_hell
-        {% elif sonne < umschalten %} scene.wohnzimmer_fairfax
+        {% if sonne >= 10 %} off
+        {% elif sonne >= 5 and sonnenstand < 10 %} scene.wohnzimmer_hell
+        {% elif sonne < 5 %} scene.wohnzimmer_fairfax
         {% endif %}
+
 
     ## [Allgemein] 3D-Drucker
     ## Anhand des gemessenden Energieverbrauches wird der Status wiedergegeben
