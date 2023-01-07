@@ -15,13 +15,18 @@ trigger:
   id: Einschalten
 - platform: state
   entity_id:
-  - media_player.lg_b9
+  - binary_sensor.fernseher
   id: Ausschalten
   to: 'off'
 - platform: state
   entity_id:
   - sensor.szenenauswahl
   id: Szenenwechsel
+- platform: state
+  entity_id:
+  - media_player.lg_b9
+  to: 'off'
+  id: Ausschalten_Backup
 condition: []
 action:
 - choose:
@@ -32,18 +37,30 @@ action:
       entity_id: light.tv_licht
       state: 'off'
     sequence:
-    - service: scene.turn_on
-      data_template:
-        entity_id: '{{ states(''input_select.szenenauswahl'') }}
-          '
-        transition: '{{ states(''input_number.tv_einschalten_transition'') }}
-          '
+    - choose:
+      - conditions:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: 'off'
+        sequence:
+        - service: scene.turn_on
+          data_template:
+            entity_id: '{{ states(''input_select.szenenauswahl'') }}
+              '
+            transition: '{{ states(''input_number.tv_einschalten_transition'') }}
+              '
   - conditions:
-    - condition: trigger
-      id: Ausschalten
     - condition: state
       entity_id: light.tv_licht
       state: 'on'
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: Ausschalten
+      - condition: trigger
+        id: Ausschalten_Backup
     sequence:
     - service: light.turn_off
       data_template:
