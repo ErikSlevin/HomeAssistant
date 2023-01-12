@@ -10,6 +10,11 @@ include:
     - sensor.wohnzimmer_soll_temperatur
     - sensor.wohnzimmer_heizungen
     
+    # Buro
+    - sensor.buero_temperature
+    - sensor.buero_heating
+    - sensor.buero_soll_temperatur
+    
     # Außen
     - sensor.aussen_temperatur
     - sensor.aussen_humidity
@@ -19,3 +24,12 @@ include:
     - sensor.tasmota_energy_total_cost
     - sensor.tasmota_energy_total_2
     - sensor.tasmota_energy_total_2_cost
+    - sensor.kuche_licht_energy_total
+    - sensor.3d_drucker
+    
+  domains:
+    - person
+    - climate
+    - input_datetime
+    - input_number
+    - input_select
