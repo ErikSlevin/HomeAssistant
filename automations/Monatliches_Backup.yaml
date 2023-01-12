@@ -1,7 +1,8 @@
 id: '1671474285814'
 alias: Monatliches Backup
 description: Am 01. jeden Monats wird ein Voll-Backup erstellt und vorhandene alte
-  Backups werden gelöscht. Benachrichtigung erfolgt via Push-Benachrichtigung.
+  Backups  werden via Shell-Skript (`find /backup/* -mtime +14 -exec rm {} \;`)
+  gelöscht. Benachrichtigung erfolgt via Push-Benachrichtigung.
 trigger:
 - platform: time
   at: 00:01:00
