@@ -1,8 +1,8 @@
 id: '1672937116825'
 alias: Szenenwechsel
-description: Wenn der Sensor den Status ändert, wird dieser Wert in den `input_select.szenenauswahl`
-  geschrieben. Zentrale Automation für die einheitliche Licht-Szenen-Steuerung in
-  der Wohnung.
+description: Wenn der Sensor den Status ändert, wird dieser Wert in den Input-Helper
+  `input_select.szenenauswahl` geschrieben. Dies stellt die zentrale Automation
+  für die einheitliche Licht-Szenen-Steuerung für die Wohnung.
 trigger:
 - platform: state
   entity_id:
