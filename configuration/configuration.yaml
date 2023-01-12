@@ -10,6 +10,11 @@ lovelace:
 tts:
   - platform: google_translate
 
+# Input-Helpers
+homeassistant:
+  packages:                                            
+    input_helpers: !include 00-custom-input_helpers.yaml 
+
 # Split in einzelne Konfigurationsdateien
 recorder: !include 00-custom-recorder.yaml              # Datenbank
 mqtt: !include 00-custom-mqtt.yaml                      # MQTT
@@ -28,16 +33,16 @@ light switch: !include 00-custom-light-switch.yaml      # Licht-Schalter
 mobile_app:
 
 webostv:
-    host: !secret ip_fernseher
-    name: 'Fernseher'
-    turn_on_action:
-      service: wake_on_lan.send_magic_packet
-      data: 
-        mac: !secret mac_fernseher
-    customize:
-      sources:
-        - Sky
-        - Kodi
+  host: !secret ip_fernseher
+  name: 'Fernseher'
+  turn_on_action:
+    service: wake_on_lan.send_magic_packet
+  data: 
+    mac: !secret mac_fernseher
+  customize:
+    sources:
+      - Sky
+      - Kodi
 
 switch:
   - platform: wake_on_lan
