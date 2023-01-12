@@ -30,6 +30,20 @@
         {% elif t > 15 %} druckt
         {% endif %}
 
+    ## [Allgemein] Sonnen Auf/Untergang
+    ## Gibt entweder Sonnenaufgang oder Sonnenuntergang aus
+    sonnenaufgang:
+      friendly_name: "Sonnen Auf/Untergang"
+      icon_template: >-
+        {% if is_state('sensor.sonnenaufgang','Sonnenaufgang') %} mdi:weather-sunset-up
+        {% else %} mdi:weather-sunset-down
+        {% endif %}  
+      value_template: >-
+        {% set rising = state_attr('sun.sun','rising') %}
+        {% if rising == True %} Sonnenaufgang
+        {% else %} Sonnenuntergang
+        {% endif %}
+
     ## [Klima] Außen Temperatur
     ## Temperatur von dem eingestellter Standort  
     aussen_temperatur:
@@ -63,6 +77,14 @@
         {%set links = float(states('sensor.heizung_links_heating')) %}
         {%set rechts = float(states('sensor.heizung_rechts_heating')) %}
         {{ (links + rechts) / 2}}
+
+    ## [Klima] Büro Soll-Temperatur
+    ## Eingestellte Soll-Temperatur im Büro
+    buero_soll_temperatur:
+      friendly_name: "Büro Soll-Temperatur"
+      icon_template: mdi:thermometer-high
+      unit_of_measurement: '°C'
+      value_template: "{{state_attr('climate.buro','temperature') }}"
 
     ## [Staubsauger] Sensoren reinigen
     ## False, wenn kein Sensor gereinigt werden muss. Gibt den jeweiligen Sensor als String zurück, wenn Reinigung notwenidg
@@ -102,4 +124,5 @@
         {% set letzte_reinigung = states('sensor.roborock_vacuum_a10_last_clean_start') %}
         {% set zwangsreinigung = states('input_number.nach_tagen_reinigen') | int %}
         {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
-        {{ zwangsreinigung.strftime('%d.%m.%Y') }}      
+        {{ zwangsreinigung.strftime('%d.%m.%Y') }}
+        
