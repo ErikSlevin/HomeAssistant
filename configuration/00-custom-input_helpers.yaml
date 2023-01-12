@@ -1,0 +1,133 @@
+ # --------- I N P U T   N U M B E R --------- #
+input_number:
+
+  ## [Input_Number] Staubsauger entleeren
+  ## Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
+  staubsauger_entleeren:
+    name: "Staubsauger entleeren"
+    unit_of_measurement: "mal"
+    icon: mdi:trash-can
+    min: 1
+    max: 20
+    step: 1
+
+  ## [Input_Number] Staubsauger entleeren
+  ## Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
+  nach_tagen_reinigen:
+    name: "Nach Tagen reinigen"
+    unit_of_measurement: "Tage"
+    icon: mdi:calendar-expand-horizontal-outline
+    min: 1
+    max: 7
+    step: 1
+
+  ## [Input_Number] TV-Licht Einschalten Transition
+  ## Länge der Transition beim Einschalten in Sekunden, bis 100% erreicht wurde.
+  tv_einschalten_transition:
+    name: "TV-Licht: [ON] Übergang"
+    unit_of_measurement: "sek"
+    icon: mdi:transition
+    min: 0
+    max: 30
+    step: 0.2
+
+  ## [Input_Number] TV-Licht Auschalten Transition
+  ## Länge der Transition beim Ausschalten in Sekunden, bis 0% erreicht wurde.
+  tv_ausschalten_transition:
+    name: "TV-Licht: [OFF] Übergang"
+    unit_of_measurement: "sek"
+    icon: mdi:transition
+    min: 0
+    max: 30
+    step: 0.2
+
+  ## [Input_Number] TV-Licht Change Transition
+  ## Länge der Transition bei einem Szenen-Wechsel in Sekunden.
+  tv_umschalten_transition:
+    name: "TV-Licht: [CHANGE] Übergang"
+    unit_of_measurement: "sek"
+    icon: mdi:transition
+    min: 0
+    max: 300
+    step: 10
+
+  ## [Input_Number] TV-Licht Ausschalten
+  ## Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
+  tv_licht_aus:
+    name: "TV-Licht: [SUN-OFF]"
+    unit_of_measurement: "Grad"
+    icon: mdi:white-balance-sunny
+    min: 0
+    max: 8
+    step: 0.2
+
+  ## [Input_Number] TV-Licht Change Transition
+  ## Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
+  tv_licht_ubergang:
+    name: "TV-Licht: [SUN-CHANGE]"
+    unit_of_measurement: "Grad"
+    icon: mdi:weather-sunset
+    min: -4
+    max: 5
+    step: 0.2
+    
+  ## [Input_Number] Flur Licht Abends
+  ## Bei welchem Sonnenstand soll das Flur-Licht eingeschaltet werden.
+  flur_licht_abends:
+    name: "Flur Licht Abends"
+    unit_of_measurement: "Grad"
+    icon: mdi:weather-sunset-down
+    min: -8
+    max: 8
+    step: 0.2
+    
+  ## [Input_Number] Flur Licht Früh
+  ## Bei welchem Sonnenstand soll das Flur-Licht ausgeschaltet werden.
+  flur_licht_fruh:
+    name: "Flur Licht Früh"
+    unit_of_measurement: "Grad"
+    icon: mdi:weather-sunset-up
+    min: -8
+    max: 8
+    step: 0.2
+    
+  ## [Input_Number] Wohnungs Temperatur
+  ## Welche Temperatur muss unterschritten werden, damit bei Abwesenheit geheizt wird
+  wohungs_temperatur:
+    name: "Wohnungs Temperatur"
+    unit_of_measurement: "Grad"
+    icon: mdi:coolant-temperature
+    min: 14
+    max: 19
+    step: 1
+
+# --------- I N P U T   S E L E C T --------- #
+input_select:
+
+  ## [Input_Select] Szenenauswahl
+  ## Einheitliche Szenenauswahl für alle Phillips Hue Lampen
+  szenenauswahl:
+    name: "Szenen Auswahl"
+    icon: mdi:form-select
+    options:
+      - scene.wohnzimmer_fairfax
+      - scene.wohnzimmer_hell
+
+# --------- I N P U T   D A T E T I M E --------- #
+input_datetime:
+
+  ## [Input_Datetime] Staubsaugen Beginn
+  ## Ab welcher Uhrzeit soll gereinigt werden.
+  staubsaugen_beginn:
+    name: "Staubsaugen Beginn"
+    icon: mdi:robot-vacuum
+    has_date: false
+    has_time: true
+
+  ## [Input_Datetime] Staubsaugen Ende
+  ## Bis zu welcher Uhrzeit darf gereinigt werden.
+  staubsaugen_ende:
+    name: "Staubsaugen Ende"
+    icon: mdi:robot-vacuum
+    has_date: false
+    has_time: true
