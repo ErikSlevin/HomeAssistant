@@ -77,6 +77,20 @@ action:
             entity_id: media_player.mass_wohnzimmer
           data:
             shuffle: true
+        - if:
+          - condition: template
+            value_template: '{{ state_attr(''media_player.lg_b9'',''is_volume_muted'')
+              == false}}'
+          then:
+          - service: media_player.volume_mute
+            data:
+              is_volume_muted: true
+            target:
+              entity_id: media_player.lg_b9
+          - service: webostv.command
+            data:
+              entity_id: media_player.lg_b9
+              command: com.webos.service.tvpower/power/turnOffScreen
       - conditions:
         - condition: device
           device_id: d4ca3c37c7262ab00aebe569650ad102
@@ -88,6 +102,20 @@ action:
           data: {}
           target:
             entity_id: media_player.wohnzimmer
+        - if:
+          - condition: template
+            value_template: '{{ state_attr(''media_player.lg_b9'',''is_volume_muted'')
+              == true}}'
+          then:
+          - service: media_player.volume_mute
+            data:
+              is_volume_muted: false
+            target:
+              entity_id: media_player.lg_b9
+          - service: webostv.command
+            data:
+              entity_id: media_player.lg_b9
+              command: com.webos.service.tvpower/power/turnOnScreen
       default: []
   default: []
 mode: single
