@@ -27,4 +27,5 @@ action:
   device_id: 56661d1855347f947a777e4fb31309a0
   entity_id: switch.tasmota_2
   domain: switch
+  enabled: true
 mode: single
