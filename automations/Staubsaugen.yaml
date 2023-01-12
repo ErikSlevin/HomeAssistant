@@ -1,12 +1,14 @@
 id: '1672891624068'
 alias: Staubsaugen
-description: "15min Abwesenheit: Zwischen festgelegten Zeiten via Helfer wird die
-  Wohnung gereinigt. \n\nZwangsreinigung: Abfrage erfolgt täglich, ob eine Zwangsreinigung
-  durchgeführt werden soll. Eine Zwangsreinigung findet statt, wenn eine bestimmte
-  Anzahl an Tagen nicht gereinigt wurde. \n\nStaubbehälter: Nach einer Anzahl von
-  Reinigungen wird eine Push-Benachrichtigung versendet, dass der Behälter entleert
-  werden soll. \n\nSensoren: Wenn Sensoren gereinigt werden müssen, wird eine Push-Benachrichtigung
-  versendet und der Counter zurückgesetzt."
+description: "15min Abwesenheit: Zwischen den eingestellten Zeiten (`input_datetime.staubsaugen_beginn`
+  und `input_datetime.staubsaugen_ende`)\n wird die Wohnung gereinigt. \n\nZwangsreinigung:
+  Eine Zwangsreinigung ist notwendig, wenn wenn nach eine bestimmte Anzahl an Tagen
+  nicht gereinigt wurde.\n\nStaubbehälter: Nach einer Anzahl von Reinigungen (`input_number.staubsauger_entleeren`)
+  wird eine Push-Benachrichtigung versendet, dass der Behälter entleert werden soll.
+  \n\nSensoren: Wenn Sensoren gereinigt werden müssen, wird eine Push-Benachrichtigung
+  versendet und der Counter zurückgesetzt.\n\nKüche: Wenn der Küchen-Lichtschalter
+  2x schnell hintereinander gedrückt wird, wird die Küche entlang der Küchenschränke
+  (Zone) gereinigt."
 trigger:
 - platform: state
   entity_id:
@@ -14,6 +16,10 @@ trigger:
   from: 'on'
   to: 'off'
   id: Abwesenheit
+  for:
+    hours: 0
+    minutes: 10
+    seconds: 0
 - platform: time
   at: input_datetime.staubsaugen_beginn
   id: Start
@@ -28,10 +34,13 @@ trigger:
   - sensor.staubsauger_sensoren_reinigen
   from: 'False'
   id: Sensoren
-condition:
-- condition: time
-  after: input_datetime.staubsaugen_beginn
-  before: input_datetime.staubsaugen_ende
+- platform: device
+  device_id: e63d7afbcf7e0943762c75cef2332a73
+  domain: shelly
+  type: double_push
+  subtype: button1
+  id: Küche
+condition: []
 action:
 - choose:
   - conditions:
@@ -51,6 +60,12 @@ action:
     - condition: state
       entity_id: binary_sensor.staubsauger_heute_reinigung_notwendig
       state: 'on'
+    - condition: time
+      after: input_datetime.staubsaugen_beginn
+      before: input_datetime.staubsaugen_ende
+    - condition: state
+      entity_id: vacuum.roborock_vacuum_a10
+      state: docked
     sequence:
     - service: notify.gotify
       data:
@@ -65,7 +80,7 @@ action:
       - platform: state
         entity_id:
         - vacuum.roborock_vacuum_a10
-        to: docked
+        to: returning
       continue_on_timeout: false
       timeout:
         hours: 2
@@ -83,6 +98,9 @@ action:
     - condition: state
       entity_id: binary_sensor.staubsauger_zwangsreinigung
       state: 'on'
+    - condition: time
+      after: input_datetime.staubsaugen_beginn
+      before: input_datetime.staubsaugen_ende
     sequence:
     - service: notify.gotify
       data:
@@ -98,7 +116,7 @@ action:
       - platform: state
         entity_id:
         - vacuum.roborock_vacuum_a10
-        to: docked
+        to: returning
       timeout:
         hours: 2
         minutes: 0
@@ -116,11 +134,16 @@ action:
     - service: notify.gotify
       data:
         title: Roborock S6 MaxV
-        message: '{{states(''sensor.staubsauger_sensoren_reinigen'')}}'
-      enabled: true
+        message: Staubbehälter entleeren - {states('input_number.staubsauger_entleeren')
+          | int }} wurden Reinigungen durchgeführt.
   - conditions:
     - condition: trigger
       id: Sensoren
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.staubsauger_sensoren_reinigen
+        state: unavailable
     sequence:
     - service: notify.gotify
       data:
@@ -176,4 +199,18 @@ action:
             command: reset_consumable
             params:
             - sensor_dirty_time
+  - conditions:
+    - condition: trigger
+      id: Küche
+    sequence:
+    - service: xiaomi_miio.vacuum_clean_zone
+      data:
+        zone:
+        - - 20117
+          - 22994
+          - 21417
+          - 26594
+        repeats: 1
+      target:
+        entity_id: vacuum.roborock_vacuum_a10
 mode: single
