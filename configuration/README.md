@@ -1,44 +1,44 @@
 # Konfigurations Übersicht
-zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr 
+zuletzt automatisch aktualisiert: 12.01.2023 um 09:13 Uhr 
 
 ## Input_Number
 
 * `input_number.staubsauger_entleeren`
   *  Staubsauger entleeren
   * Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
-</br>
+</br></br>
 * `input_number.nach_tagen_reinigen`
   *  Staubsauger entleeren
   * Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
-</br>
+</br></br>
 * `input_number.tv_einschalten_transition`
   *  TV-Licht Einschalten Transition
   * Länge der Transition beim Einschalten in Sekunden, bis 100% erreicht wurde.
-</br>
+</br></br>
 * `input_number.tv_ausschalten_transition`
   *  TV-Licht Auschalten Transition
   * Länge der Transition beim Ausschalten in Sekunden, bis 0% erreicht wurde.
-</br>
+</br></br>
 * `input_number.tv_umschalten_transition`
   *  TV-Licht Change Transition
   * Länge der Transition bei einem Szenen-Wechsel in Sekunden.
-</br>
+</br></br>
 * `input_number.tv_licht_aus`
   *  TV-Licht Ausschalten
   * Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
-</br>
+</br></br>
 * `input_number.tv_licht_ubergang`
   *  TV-Licht Change Transition
   * Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
-</br>
+</br></br>
 * `input_number.flur_licht_abends`
   *  Flur Licht Abends
   * Bei welchem Sonnenstand soll das Flur-Licht eingeschaltet werden.
-</br>
+</br></br>
 * `input_number.flur_licht_fruh`
   *  Flur Licht Früh
   * Bei welchem Sonnenstand soll das Flur-Licht ausgeschaltet werden.
-</br>
+</br></br>
 * `input_number.wohungs_temperatur`
   *  Wohnungs Temperatur
   * Welche Temperatur muss unterschritten werden, damit bei Abwesenheit geheizt wird
@@ -48,26 +48,26 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 * `binary_sensor.staubsauger_heute_reinigung_notwendig`
   *  Heute noch nicht gereinigt
   * ```True```, wenn heute noch nicht gereinigt wurde (auch keine kurze Küchenreinigung)
-</br>
+</br></br>
 * `binary_sensor.staubsauger_entleeren`
   *  Staubbehälter entleeren
   * ```True```, wenn 'Anzahl der Gesamtreinigungen' / '(Helfer) Nach Reinigungen leeren' = Rest 0
-</br>
+</br></br>
 * `binary_sensor.staubsauger_zwangsreinigung`
   *  Zwangsreinigung
   * ```True```, wenn letzte Reinigung in Tagen zu lange zurück liegt
-</br>
+</br></br>
 *  Custom Card
    * Anzeige der Karte im Lovelance UI
-</br>
+</br></br>
 * `sensor.staubsauger_sensoren_reinigen`
   *  Sensoren reinigen
   * ```False```, wenn kein Sensor gereinigt werden muss. Gibt den jeweiligen Sensor als String zurück, wenn Reinigung notwenidg
-</br>
+</br></br>
 * `sensor.staubsauger_entleeren_datum`
   *  Staubbehälter leeren (Datum)
   * Gibt das Datum zurück, wann der Behälter entleert werden muss,wenn wenn täglich gereinigt wird
-</br>
+</br></br>
 * `sensor.staubsauger_naechste_geplante_reinigung`
   *  Nächste Reinigung (Datum)
   * Gibt das Datum zurück, wann die nächste Reinigung ansteht
@@ -77,19 +77,19 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 * `sensor.aussen_temperatur`
   *  Außen Temperatur
   * Temperatur von dem eingestellter Standort
-</br>
+</br></br>
 * `sensor.aussen_humidity`
   *  Außen Luftfeuchtigkeit
   * Luftfeuchtigkeit von dem eingestellter Standort
-</br>
+</br></br>
 * `sensor.wohnzimmer_soll_temperatur`
   *  Wohnzimmer Soll-Temperatur
   * Eingestellte Soll-Temperatur im Wohnzimmer
-</br>
+</br></br>
 * `sensor.wohnzimmer_heizungen`
   *  Wohnzimmer Heizungslevel 
   * Heizungslevel Durchschnitt der zwei Heizungen
-</br>
+</br></br>
 * `sensor.buero_soll_temperatur`
   *  Büro Soll-Temperatur
   * Eingestellte Soll-Temperatur im Büro
@@ -99,11 +99,11 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 * `binary_sensor.anwesend`
   *  Anwesenheitserkennung
   * ```True```, wenn keiner Zuhause ist
-</br>
+</br></br>
 * `sensor.3d_drucker`
   *  3D-Drucker
   * Anhand des gemessenden Energieverbrauches wird der Status wiedergegeben
-</br>
+</br></br>
 * `sensor.sonnenaufgang`
   *  Sonnen Auf/Untergang
   * Gibt entweder Sonnenaufgang oder Sonnenuntergang aus
@@ -112,10 +112,10 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 
 *  TV Beleuchtung
    * Fasse die drei Lampen zu einer Gruppe zusammen
-</br>
+</br></br>
 *  Lichtschalter
    * Manuell erstellter Lichtschalter für den Shelly
-</br>
+</br></br>
 * `sensor.szenenauswahl`
   *  TV-Beleuchtung
   * Abhängig vom Sonnenstand wird eine Hue-Szene ausgewählt und in einer Automation automatisch gesetzt
@@ -125,7 +125,7 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 * `input_datetime.staubsaugen_beginn`
   *  Staubsaugen Beginn
   * Ab welcher Uhrzeit soll gereinigt werden.
-</br>
+</br></br>
 * `input_datetime.staubsaugen_ende`
   *  Staubsaugen Ende
   * Bis zu welcher Uhrzeit darf gereinigt werden.
@@ -134,7 +134,7 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 08:57 Uhr
 
 *  Fernseher
    * LG B9
-</br>
+</br></br>
 *  NAS
    * Synology Diskstation DS214play
 
