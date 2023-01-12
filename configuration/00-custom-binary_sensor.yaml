@@ -36,11 +36,10 @@
         {% endif %}      
       value_template: >-
         {% set letzte_reinigung = as_timestamp(states('sensor.roborock_vacuum_a10_last_clean_start')) | timestamp_custom('%d.%m.%Y') %}
-        {% set kueche_reinigung = as_timestamp(state_attr('automation.kuche_staubsaugen','last_triggered')) | timestamp_custom('%d.%m.%Y') %}
         {% set automatische_reinigung =  as_timestamp(state_attr('automation.staubsaugen','last_triggered')) | timestamp_custom('%d.%m.%Y') %}
         {% set heute = as_timestamp(now()) | timestamp_custom('%d.%m.%Y') %}
         {% if letzte_reinigung != heute %} {{ true }}
-        {% elif (kueche_reinigung == heute) and (automatische_reinigung != heute) %} {{ true }}
+        {% elif automatische_reinigung != heute %} {{ true }}
         {% else %} {{ false }}
         {% endif %}
 
