@@ -1,7 +1,8 @@
 id: '1654455377953'
 alias: 'Flurlicht ein-/ausschalten '
-description: 'Wenn jemand Zuhause ist: Wenn Bewegung im Flur erkannt wurde und die
-  Sonne 3° über dem Horizont ist - schalte das Flur Licht ein.
+description: 'Wenn Anwesend: Wenn Bewegung im Flur erkannt wurde und die Sonne über
+  den eingestellten Wert von dem Helfer `input_number.flur_licht_fruh` (Früh) oder
+  `input_number.flur_licht_abends` (Abends) ist - schalte das Flur Licht ein.
   Sobald für 15 Sekunden keine Bewegung mehr in Flur detektiert wurde - schalte
   das Flur Licht wieder aus.'
 trigger:
@@ -30,15 +31,34 @@ action:
   - conditions:
     - condition: trigger
       id: 'ON'
-    - condition: numeric_state
-      entity_id: sun.sun
-      attribute: elevation
-      below: 3
     sequence:
-    - service: light.turn_on
-      data: {}
-      target:
-        entity_id: light.flur
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: sensor.sonnenaufgang
+          state: Sonnenuntergang
+        - condition: numeric_state
+          entity_id: sun.sun
+          attribute: elevation
+          below: input_number.flur_licht_abends
+        sequence:
+        - service: light.turn_on
+          data: {}
+          target:
+            entity_id: light.flur
+      - conditions:
+        - condition: state
+          entity_id: sensor.sonnenaufgang
+          state: Sonnenaufgang
+        - condition: numeric_state
+          entity_id: sun.sun
+          attribute: elevation
+          below: input_number.flur_licht_fruh
+        sequence:
+        - service: light.turn_on
+          data: {}
+          target:
+            entity_id: light.flur
   - conditions:
     - condition: trigger
       id: 'OFF'
