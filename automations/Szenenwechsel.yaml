@@ -7,6 +7,10 @@ trigger:
 - platform: state
   entity_id:
   - sensor.szenenauswahl
+  for:
+    hours: 0
+    minutes: 1
+    seconds: 0
 condition: []
 action:
 - service: input_select.select_option
