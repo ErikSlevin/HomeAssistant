@@ -1,5 +1,5 @@
 # Automations Übersicht
-zuletzt automatisch aktualisiert: 12.01.2023 um 09:13 Uhr 
+zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr 
 
 
 ## Flurlicht ein-/ausschalten 
@@ -9,9 +9,9 @@ File: [Flurlicht_ein-_ausschalten.yaml](Flurlicht_ein-_ausschalten.yaml)
 
 Verwendete Sensoren:
 * [binary_sensor.anwesend](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-binary_sensor.yaml?plain=1#L23-L25)
-* [input_number.flur_licht_abends](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L74-L76)
-* [input_number.flur_licht_fruh](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L84-L86)
-* [sensor.sonnenaufgang](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L33-L35)
+* [input_number.flur_licht_abends](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L94-L96)
+* [input_number.flur_licht_fruh](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L104-L106)
+* [sensor.sonnenaufgang](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L44-L46)
 
 
 ## 3D-Drucker
@@ -43,11 +43,11 @@ Verwendete Sensoren:
 * [binary_sensor.staubsauger_entleeren](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-binary_sensor.yaml?plain=1#L46-L48)
 * [binary_sensor.staubsauger_heute_reinigung_notwendig](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-binary_sensor.yaml?plain=1#L29-L31)
 * [binary_sensor.staubsauger_zwangsreinigung](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-binary_sensor.yaml?plain=1#L60-L62)
-* [input_datetime.staubsaugen_beginn](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L119-L121)
-* [input_datetime.staubsaugen_ende](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L127-L129)
+* [input_datetime.staubsaugen_beginn](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L139-L141)
+* [input_datetime.staubsaugen_ende](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L147-L149)
 * [input_number.nach_tagen_reinigen](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L14-L16)
 * [input_number.staubsauger_entleeren](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L4-L6)
-* [sensor.staubsauger_sensoren_reinigen](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L89-L91)
+* [sensor.staubsauger_sensoren_reinigen](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L110-L112)
 
 
 ## TV Beleuchtung
@@ -61,7 +61,7 @@ Verwendete Sensoren:
 * [input_number.tv_ausschalten_transition](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L34-L36)
 * [input_number.tv_einschalten_transition](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L24-L26)
 * [input_number.tv_umschalten_transition](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L44-L46)
-* [input_select.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L107-L109)
+* [input_select.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L127-L129)
 * [sensor.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L4-L6)
 
 
@@ -71,7 +71,7 @@ File: [Szenenwechsel.yaml](Szenenwechsel.yaml)
 
 
 Verwendete Sensoren:
-* [input_select.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L107-L109)
+* [input_select.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L127-L129)
 * [sensor.szenenauswahl](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-sensor.yaml?plain=1#L4-L6)
 
 
@@ -82,6 +82,6 @@ File: [Klima.yaml](Klima.yaml)
 
 Verwendete Sensoren:
 * [binary_sensor.anwesend](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-binary_sensor.yaml?plain=1#L23-L25)
-* [input_number.wohungs_temperatur](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L94-L96)
+* [input_number.wohungs_temperatur](http://github.com/erikslevin/homeassistant/tree/main/configuration/00-custom-input_helpers.yaml?plain=1#L114-L116)
 
 
