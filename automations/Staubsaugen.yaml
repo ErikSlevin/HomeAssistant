@@ -40,6 +40,16 @@ trigger:
   type: double_push
   subtype: button1
   id: Küche
+- platform: state
+  entity_id:
+  - vacuum.roborock_vacuum_a10
+  to: error
+  id: Error
+- platform: state
+  entity_id:
+  - vacuum.roborock_vacuum_a10
+  to: returning
+  id: Erfolgreich
 condition: []
 action:
 - choose:
@@ -83,15 +93,31 @@ action:
         to: returning
       continue_on_timeout: false
       timeout:
-        hours: 2
+        hours: 0
         minutes: 0
         seconds: 0
         milliseconds: 0
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
-          abgeschlossen.
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: vacuum.roborock_vacuum_a10
+          state: returning
+        sequence:
+        - service: notify.gotify
+          data:
+            title: Roborock S6 MaxV
+            message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+              Uhr')}} abgeschlossen.
+      - conditions:
+        - condition: state
+          entity_id: vacuum.roborock_vacuum_a10
+          state: error
+        sequence:
+        - service: notify.gotify
+          data:
+            title: Roborock S6 MaxV - Error!
+            message: Reinigung wegen eines Fehlers um {{as_timestamp(now()) | timestamp_custom('%H:%M
+              Uhr')}} abgebrochen.
   - conditions:
     - condition: trigger
       id: Start
@@ -118,15 +144,32 @@ action:
         - vacuum.roborock_vacuum_a10
         to: returning
       timeout:
-        hours: 2
+        hours: 0
         minutes: 0
         seconds: 0
         milliseconds: 0
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
-          abgeschlossen.
+      continue_on_timeout: false
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: vacuum.roborock_vacuum_a10
+          state: returning
+        sequence:
+        - service: notify.gotify
+          data:
+            title: Roborock S6 MaxV
+            message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+              Uhr')}} abgeschlossen.
+      - conditions:
+        - condition: state
+          entity_id: vacuum.roborock_vacuum_a10
+          state: error
+        sequence:
+        - service: notify.gotify
+          data:
+            title: Roborock S6 MaxV - Error!
+            message: Reinigung wegen eines Fehlers um {{as_timestamp(now()) | timestamp_custom('%H:%M
+              Uhr')}} abgebrochen.
   - conditions:
     - condition: trigger
       id: Staubbehälter
