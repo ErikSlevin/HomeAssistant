@@ -51,24 +51,44 @@ input_number:
     max: 300
     step: 10
 
-  ## [Input_Number] TV-Licht Ausschalten
-  ## Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
-  tv_licht_aus:
-    name: "TV-Licht: [SUN-OFF]"
+  ## [Input_Number] TV-Licht Aus zu Hell (Abend)
+  ## Bei welchem Sonnenstand soll das TV-Licht Abends in die Szene Hell versetzt werden.
+  tv_licht_aus_zu_hell_abend:
+    name: "TV-Licht: Aus zu Hell (Abend)"
     unit_of_measurement: "Grad"
-    icon: mdi:white-balance-sunny
-    min: 0
-    max: 8
+    icon: mdi:weather-sunset-down
+    min: -10
+    max: 10
     step: 0.2
 
-  ## [Input_Number] TV-Licht Change Transition
-  ## Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
-  tv_licht_ubergang:
-    name: "TV-Licht: [SUN-CHANGE]"
+  ## [Input_Number] TV-Licht Hell zu Farbig (Abend)
+  ## Bei welchem Sonnenstand soll das TV-Licht Abends in die farbige Szene versetzt werden.
+  tv_licht_hell_zu_farbig_abend:
+    name: "TV-Licht: Hell zu Farbig (Abend)"
     unit_of_measurement: "Grad"
-    icon: mdi:weather-sunset
-    min: -4
-    max: 5
+    icon: mdi:weather-sunset-down
+    min: -10
+    max: 10
+    step: 0.2
+    
+  ## [Input_Number] TV-Licht Farbig zu Hell (Früh)
+  ## Bei welchem Sonnenstand soll das TV-Licht Früh in die Szene Hell versetzt werden.
+  tv_licht_farbig_zu_hell_frueh:
+    name: "TV-Licht: Farbig zu Hell (Früh)"
+    unit_of_measurement: "Grad"
+    icon: mdi:weather-sunset-up
+    min: -10
+    max: 10
+    step: 0.2
+    
+  ## [Input_Number] TV-Licht Hell zu Aus (Früh)
+  ## Bei welchem Sonnenstand soll das TV-Licht Früh ausgeschaltet werden.
+  tv_licht_hell_zu_aus_frueh:
+    name: "TV-Licht: Hell zu aus (Früh)"
+    unit_of_measurement: "Grad"
+    icon: mdi:weather-sunset-up
+    min: -10
+    max: 10
     step: 0.2
     
   ## [Input_Number] Flur Licht Abends
@@ -97,9 +117,9 @@ input_number:
     name: "Wohnungs Temperatur"
     unit_of_measurement: "Grad"
     icon: mdi:coolant-temperature
-    min: 14
-    max: 19
-    step: 1
+    min: 10
+    max: 16
+    step: 0.5
 
 # --------- I N P U T   S E L E C T --------- #
 input_select:
