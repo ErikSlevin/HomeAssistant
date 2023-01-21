@@ -1,5 +1,5 @@
 # Konfigurations Übersicht
-zuletzt automatisch aktualisiert: 12.01.2023 um 09:13 Uhr 
+zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr 
 
 ## Input_Number
 
@@ -23,13 +23,21 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 09:13 Uhr
   *  TV-Licht Change Transition
   * Länge der Transition bei einem Szenen-Wechsel in Sekunden.
 </br></br>
-* `input_number.tv_licht_aus`
-  *  TV-Licht Ausschalten
-  * Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
+* `input_number.tv_licht_aus_zu_hell_abend`
+  *  TV-Licht Aus zu Hell (Abend)
+  * Bei welchem Sonnenstand soll das TV-Licht Abends in die Szene Hell versetzt werden.
 </br></br>
-* `input_number.tv_licht_ubergang`
-  *  TV-Licht Change Transition
-  * Bei welchem Sonnenstand soll das TV-Licht ausgeschaltet werden.
+* `input_number.tv_licht_hell_zu_farbig_abend`
+  *  TV-Licht Hell zu Farbig (Abend)
+  * Bei welchem Sonnenstand soll das TV-Licht Abends in die farbige Szene versetzt werden.
+</br></br>
+* `input_number.tv_licht_farbig_zu_hell_frueh`
+  *  TV-Licht Farbig zu Hell (Früh)
+  * Bei welchem Sonnenstand soll das TV-Licht Früh in die Szene Hell versetzt werden.
+</br></br>
+* `input_number.tv_licht_hell_zu_aus_frueh`
+  *  TV-Licht Hell zu Aus (Früh)
+  * Bei welchem Sonnenstand soll das TV-Licht Früh ausgeschaltet werden.
 </br></br>
 * `input_number.flur_licht_abends`
   *  Flur Licht Abends
@@ -107,6 +115,10 @@ zuletzt automatisch aktualisiert: 12.01.2023 um 09:13 Uhr
 * `sensor.sonnenaufgang`
   *  Sonnen Auf/Untergang
   * Gibt entweder Sonnenaufgang oder Sonnenuntergang aus
+</br></br>
+* `sensor.sonnenstand`
+  *  Sonnenstand
+  * Gibt die Elevation der Sonne in Grad aus
 
 ## Licht
 
