@@ -10,14 +10,25 @@
         {% else %} mdi:lightbulb-group
         {% endif %}  
       value_template: >-
-        {% set sonne = state_attr('sun.sun','elevation') %}
-        {% set ausschalten = states('input_number.tv_licht_aus') | float %}
-        {% set umschalten = states('input_number.tv_licht_ubergang') | float %}
-        {% if sonne >= ausschalten %} off
-        {% elif sonne >= umschalten and sonne < ausschalten %} scene.wohnzimmer_hell
-        {% elif sonne < umschalten %} scene.wohnzimmer_fairfax
+        {% set A = states('input_number.tv_licht_aus_zu_hell_abend') | float %}
+        {% set B = states('input_number.tv_licht_hell_zu_farbig_abend') | float %}
+        {% set C = states('input_number.tv_licht_farbig_zu_hell_frueh') | float %}
+        {% set D = states('input_number.tv_licht_hell_zu_aus_frueh') | float %}  
+        {% set up = is_state('sensor.sonnenaufgang',"Sonnenaufgang") %}
+        {% set down = is_state('sensor.sonnenaufgang',"Sonnenuntergang")  %}
+        {% set S = states('sensor.sonnenstand') | float %}
+        {% set HELL = is_state('sensor.szenenauswahl',"scene.wohnzimmer_hell") %}
+        {% set FARB = is_state('sensor.szenenauswahl',"scene.wohnzimmer_fairfax") %}
+        {% set FALSE = is_state('sensor.szenenauswahl',"False") %}
+        
+        {% if down == True and S > A %} False
+        {% elif down == True and S < A and S > B %} scene.wohnzimmer_hell
+        {% elif down == True and S < B %} scene.wohnzimmer_fairfax
+        {% elif up == True and S < C %} scene.wohnzimmer_fairfax
+        {% elif up == True and S > C and S < D %} scene.wohnzimmer_hell
+        {% elif up == True and S > D %} False
         {% endif %}
-
+        
     ## [Allgemein] 3D-Drucker
     ## Anhand des gemessenden Energieverbrauches wird der Status wiedergegeben
     3d_drucker:
@@ -44,6 +55,16 @@
         {% else %} Sonnenuntergang
         {% endif %}
 
+    ## [Allgemein] Sonnenstand
+    ## Gibt die Elevation der Sonne in Grad aus
+    sonnenstand:
+      friendly_name: "Sonnenstand"
+      unit_of_measurement: '°'
+      value_template: >-
+        {% set sun = state_attr('sun.sun','elevation') %}
+        {% if sun != 'unknown' or sun != 'unavailable' %} {{state_attr('sun.sun','elevation')}}
+        {% endif %}
+        
     ## [Klima] Außen Temperatur
     ## Temperatur von dem eingestellter Standort  
     aussen_temperatur:
