@@ -9,8 +9,8 @@ trigger:
   - sensor.szenenauswahl
   for:
     hours: 0
-    minutes: 1
-    seconds: 0
+    minutes: 0
+    seconds: 30
 condition: []
 action:
 - service: input_select.select_option

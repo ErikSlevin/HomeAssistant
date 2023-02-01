@@ -1,7 +1,11 @@
 id: '1661977068386'
 alias: Küche
 description: 'Einfacher Tastendruck: Licht in der Küche wird An/Aus geschaltet.
-  Langer Tastendruck: Spotify Playlist wird abgespielt.'
+  Langer Tastendruck: Spotify Playlist wird abgespielt. Sollte hierbei der Fernseher
+  laufen, wird dieser auf Lautlos gestellt und der Bildschirm ausgeschaltet. Sobald
+  die Musik via Langer Langer Tastendruck wieder deaktiviert wird, wird der Fernseher
+  wieder auf die zuvor eingestellte Lautstärke gestellt und der Bildschirm eingeschaltet
+  Wenn bei aktiver Musikwiedergabe der TV eingeschaltet wird, wird die Muisk ausgeschaltet.'
 trigger:
 - platform: device
   device_id: e63d7afbcf7e0943762c75cef2332a73
@@ -15,6 +19,17 @@ trigger:
   type: long_push
   subtype: button1
   id: Musik
+- platform: state
+  entity_id:
+  - binary_sensor.fernseher
+  from: 'off'
+  to: 'on'
+  id: TV ON
+- platform: state
+  entity_id:
+  - media_player.lg_b9
+  from: 'off'
+  id: 'TV ON Backup '
 condition: []
 action:
 - choose:
@@ -117,5 +132,22 @@ action:
               entity_id: media_player.lg_b9
               command: com.webos.service.tvpower/power/turnOnScreen
       default: []
+  - conditions:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: TV ON
+      - condition: trigger
+        id: 'TV ON Backup '
+    - condition: device
+      device_id: d4ca3c37c7262ab00aebe569650ad102
+      domain: media_player
+      entity_id: media_player.wohnzimmer
+      type: is_playing
+    sequence:
+    - service: media_player.media_stop
+      data: {}
+      target:
+        entity_id: media_player.wohnzimmer
   default: []
 mode: single

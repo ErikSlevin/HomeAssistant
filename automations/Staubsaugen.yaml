@@ -8,7 +8,9 @@ description: "15min Abwesenheit: Zwischen den eingestellten Zeiten (`input_datet
   \n\nSensoren: Wenn Sensoren gereinigt werden müssen, wird eine Push-Benachrichtigung
   versendet und der Counter zurückgesetzt.\n\nKüche: Wenn der Küchen-Lichtschalter
   2x schnell hintereinander gedrückt wird, wird die Küche entlang der Küchenschränke
-  (Zone) gereinigt."
+  (Zone) 2x gereinigt. Sollte die Reinigung zwischen 22:00 - 07:00 Uhr durchgeführt
+  werden, wird der Turbo-Modus deaktiviert und ein Leiser-Modus für diese Reinigung
+  ausgewählt."
 trigger:
 - platform: state
   entity_id:
@@ -40,16 +42,6 @@ trigger:
   type: double_push
   subtype: button1
   id: Küche
-- platform: state
-  entity_id:
-  - vacuum.roborock_vacuum_a10
-  to: error
-  id: Error
-- platform: state
-  entity_id:
-  - vacuum.roborock_vacuum_a10
-  to: returning
-  id: Erfolgreich
 condition: []
 action:
 - choose:
@@ -90,65 +82,19 @@ action:
       - platform: state
         entity_id:
         - vacuum.roborock_vacuum_a10
+        from: cleaning
         to: returning
-      continue_on_timeout: false
-      timeout:
-        hours: 0
-        minutes: 0
-        seconds: 0
-        milliseconds: 0
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: vacuum.roborock_vacuum_a10
-          state: returning
-        sequence:
-        - service: notify.gotify
-          data:
-            title: Roborock S6 MaxV
-            message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
-              Uhr')}} abgeschlossen.
-      - conditions:
-        - condition: state
-          entity_id: vacuum.roborock_vacuum_a10
-          state: error
-        sequence:
-        - service: notify.gotify
-          data:
-            title: Roborock S6 MaxV - Error!
-            message: Reinigung wegen eines Fehlers um {{as_timestamp(now()) | timestamp_custom('%H:%M
-              Uhr')}} abgebrochen.
-  - conditions:
-    - condition: trigger
-      id: Start
-    - condition: state
-      entity_id: binary_sensor.staubsauger_zwangsreinigung
-      state: 'on'
-    - condition: time
-      after: input_datetime.staubsaugen_beginn
-      before: input_datetime.staubsaugen_ende
-    sequence:
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: Reinigung nach {{ states('input_number.nach_tagen_reinigen') |
-          int }} Tagen notwendig. Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
-          Uhr') }} gestartet.
-    - service: vacuum.start
-      data: {}
-      target:
-        entity_id: vacuum.roborock_vacuum_a10
-    - wait_for_trigger:
       - platform: state
         entity_id:
         - vacuum.roborock_vacuum_a10
-        to: returning
+        from: cleaning
+        to: error
       timeout:
-        hours: 0
+        hours: 2
         minutes: 0
         seconds: 0
         milliseconds: 0
-      continue_on_timeout: false
+      continue_on_timeout: true
     - choose:
       - conditions:
         - condition: state
@@ -177,8 +123,8 @@ action:
     - service: notify.gotify
       data:
         title: Roborock S6 MaxV
-        message: Staubbehälter entleeren - {states('input_number.staubsauger_entleeren')
-          | int }} wurden Reinigungen durchgeführt.
+        message: Staubbehälter entleeren - {{states('input_number.staubsauger_entleeren')
+          | int }} Reinigungen wurden durchgeführt.
   - conditions:
     - condition: trigger
       id: Sensoren
@@ -253,7 +199,82 @@ action:
           - 22994
           - 21417
           - 26594
-        repeats: 1
+        repeats: 2
       target:
         entity_id: vacuum.roborock_vacuum_a10
+    - choose:
+      - conditions:
+        - condition: time
+          after: 07:00:00
+          before: '22:00:00'
+        sequence:
+        - service: xiaomi_miio.vacuum_clean_zone
+          data:
+            zone:
+            - - 20117
+              - 22994
+              - 21417
+              - 26594
+            repeats: 2
+          target:
+            entity_id: vacuum.roborock_vacuum_a10
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - vacuum.roborock_vacuum_a10
+            from: cleaning
+            to: returning
+          - platform: state
+            entity_id:
+            - vacuum.roborock_vacuum_a10
+            from: cleaning
+            to: error
+          timeout:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+          continue_on_timeout: true
+      - conditions:
+        - condition: time
+          after: '22:00:01'
+          before: 06:59:59
+        sequence:
+        - service: xiaomi_miio.vacuum_clean_zone
+          data:
+            zone:
+            - - 20117
+              - 22994
+              - 21417
+              - 26594
+            repeats: 3
+          target:
+            entity_id: vacuum.roborock_vacuum_a10
+        - service: vacuum.set_fan_speed
+          data:
+            fan_speed: Standard
+          target:
+            entity_id: vacuum.roborock_vacuum_a10
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - vacuum.roborock_vacuum_a10
+            from: cleaning
+            to: returning
+          - platform: state
+            entity_id:
+            - vacuum.roborock_vacuum_a10
+            from: cleaning
+            to: error
+          timeout:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+          continue_on_timeout: true
+        - service: vacuum.set_fan_speed
+          data:
+            fan_speed: Turbo
+          target:
+            entity_id: vacuum.roborock_vacuum_a10
 mode: single

@@ -16,7 +16,7 @@ action:
     entity_id: sensor.tasmota_energy_power_2
     for:
       hours: 0
-      minutes: 1
+      minutes: 15
       seconds: 0
     below: 15
 - service: notify.gotify
