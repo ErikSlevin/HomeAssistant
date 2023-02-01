@@ -71,4 +71,33 @@
         {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
         {% if zwangsreinigung <= now() %} {{ true }}
         {% else %} {{ false }}
-        {% endif %}        
+        {% endif %} 
+
+    ## [Licht] Bewegung erkannt
+    ## True, wenn bei einem von zwei Sensoren im Flur Bewegung erkannt wurde
+    flur_bewegung_erkannt:
+      friendly_name: "Flur Bewegung erkannt [ODER-FUNKTION]"
+      icon_template: >-
+        {% if is_state('flur_bewegung_erkannt','true') %} mdi:motion-sensor
+        {% else %} mdi:motion-sensor-off
+        {% endif %}
+      value_template: >-
+        {% set A = states('binary_sensor.flur_2_motion_2')  %}
+        {% set B = states('binary_sensor.flur_motion')  %}
+        {% if A == "on" or B == "on" %} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    ## [Licht] Keine Bewegung den zwei Sensoren im Flur keine Bewegung erkannt wurde
+    flur_keine_bewegung_erkannt:
+      friendly_name: "Flur keine Bewegung mehr erkannt [UND-FUNKTION]"
+      icon_template: >-
+        {% if is_state('flur_keine_bewegung_erkannt','true') %} mdi:motion-sensor
+        {% else %} mdi:motion-sensor-off
+        {% endif %}
+      value_template: >-
+        {% set A = states('binary_sensor.flur_2_motion_2')  %}
+        {% set B = states('binary_sensor.flur_motion')  %}
+        {% if A == "off" and B == "off" %} {{true}}
+        {% else %} {{false}}
+        {% endif %}
