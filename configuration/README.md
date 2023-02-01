@@ -1,5 +1,5 @@
 # Konfigurations Übersicht
-zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr 
+zuletzt automatisch aktualisiert: 01.02.2023 um 21:35 Uhr 
 
 ## Input_Number
 
@@ -102,6 +102,26 @@ zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr
   *  Büro Soll-Temperatur
   * Eingestellte Soll-Temperatur im Büro
 
+## Licht
+
+* `binary_sensor.flur_bewegung_erkannt`
+  *  Bewegung erkannt
+  * ```True```, wenn bei einem von zwei Sensoren im Flur Bewegung erkannt wurde
+</br></br>
+* `binary_sensor.friendly_name "Flur keine Bewegung mehr erkannt [UND-FUNKTION]"`
+  *  Keine Bewegung den zwei Sensoren im Flur keine Bewegung erkannt wurde
+  * flur_keine_bewegung_erkannt:
+</br></br>
+*  TV Beleuchtung
+   * Fasse die drei Lampen zu einer Gruppe zusammen
+</br></br>
+*  Lichtschalter
+   * Manuell erstellter Lichtschalter für den Shelly
+</br></br>
+* `sensor.szenenauswahl`
+  *  TV-Beleuchtung
+  * Abhängig vom Sonnenstand wird eine Hue-Szene ausgewählt und in einer Automation automatisch gesetzt
+
 ## Allgemein
 
 * `binary_sensor.anwesend`
@@ -120,27 +140,23 @@ zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr
   *  Sonnenstand
   * Gibt die Elevation der Sonne in Grad aus
 
-## Licht
-
-*  TV Beleuchtung
-   * Fasse die drei Lampen zu einer Gruppe zusammen
-</br></br>
-*  Lichtschalter
-   * Manuell erstellter Lichtschalter für den Shelly
-</br></br>
-* `sensor.szenenauswahl`
-  *  TV-Beleuchtung
-  * Abhängig vom Sonnenstand wird eine Hue-Szene ausgewählt und in einer Automation automatisch gesetzt
-
 ## Input_Datetime
 
 * `input_datetime.staubsaugen_beginn`
   *  Staubsaugen Beginn
-  * Ab welcher Uhrzeit soll gereinigt werden.
+  * zu welcher Uhrzeit soll gereinigt werden.
 </br></br>
 * `input_datetime.staubsaugen_ende`
   *  Staubsaugen Ende
   * Bis zu welcher Uhrzeit darf gereinigt werden.
+</br></br>
+* `input_datetime.alarm_time`
+  *  Alarm-Time
+  * Wann soll der Schlafzimmer Alarm ausgelöst werden
+</br></br>
+* `input_datetime.pre_alarm`
+  *  Pre-Alarm-Time
+  * Wann soll die leise Musik vor dem eigentlichen Alarm eingeschaltet werden (bsp.: 10 min vor Alarm)
 
 ## Ping
 
@@ -159,6 +175,12 @@ zuletzt automatisch aktualisiert: 21.01.2023 um 08:58 Uhr
 
 *  Mariadb
    * Verbindung zu einer Self-Hosted Datenbank (Docker-Container)
+
+## Input_Boolean
+
+* `input_boolean.alarm_switch`
+  *  Alarm On/Off
+  * Aktivierung oder Deaktivierung des Alarms
 
 ## Input_Select
 
