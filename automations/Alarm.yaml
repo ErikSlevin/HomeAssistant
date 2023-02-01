@@ -1,0 +1,134 @@
+id: '1675208635458'
+alias: Alarm
+description: 'Sanft Wecken: Wenn sich die Alarmzeit ändert, wird automatisch der
+  Input-Helper für den Pre-Alarm aktualisiert (10min vorher)'
+trigger:
+- platform: state
+  entity_id:
+  - input_datetime.alarm_time
+  id: Alarm_Change
+- platform: time
+  at: input_datetime.pre_alarm
+  id: Pre-Alarm
+- platform: state
+  entity_id:
+  - binary_sensor.flur_bewegung_erkannt
+  from: 'off'
+  to: 'on'
+  id: Aufgestanden
+condition: []
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: Alarm_Change
+    sequence:
+    - service: input_datetime.set_datetime
+      data:
+        time: '{{ as_timestamp(today_at(states(''input_datetime.alarm_time'')) -
+          timedelta(minutes = 10 )) | timestamp_custom("%H:%M", true)}}'
+      target:
+        entity_id: input_datetime.pre_alarm
+  - conditions:
+    - condition: trigger
+      id: Pre-Alarm
+    - condition: state
+      entity_id: binary_sensor.anwesend
+      state: 'on'
+    sequence:
+    - service: media_player.volume_set
+      data:
+        volume_level: 0
+      target:
+        entity_id:
+        - media_player.schlafzimmer
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 7
+        milliseconds: 0
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.schlafzimmer
+      data:
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:37i9dQZF1DX03b46zi3S82
+        media_content_type: spotify://playlist
+      metadata:
+        title: Sleepy Piano
+        thumbnail: https://i.scdn.co/image/ab67706f00000003df3ed0d891ac979568452312
+        media_class: playlist
+        children_media_class: track
+        navigateIds:
+        - {}
+        - media_content_type: spotify://library
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+        - media_content_type: spotify://categories
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/categories
+        - media_content_type: spotify://category_playlists
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/0JQ5DAqbMKFCuoRTxhYWow
+        - media_content_type: spotify://playlist
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:37i9dQZF1DX03b46zi3S82
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 7
+        milliseconds: 0
+    - service: script.fade_volume
+      data:
+        curve: linear
+        target_player: media_player.schlafzimmer
+        duration: 120
+        target_volume: 0.5
+  - conditions:
+    - condition: trigger
+      id: Aufgestanden
+    - condition: state
+      entity_id: binary_sensor.anwesend
+      state: 'on'
+    - condition: device
+      device_id: 44ec07205b7efd3b49e48d086b2d77a3
+      domain: media_player
+      entity_id: media_player.schlafzimmer
+      type: is_playing
+    sequence:
+    - service: media_player.volume_set
+      data:
+        volume_level: 0.4
+      target:
+        entity_id:
+        - media_player.allen_lautsprechern
+    - service: tts.google_translate_say
+      data:
+        entity_id: media_player.allen_lautsprechern
+        language: de
+        cache: true
+        message: Guten Morgen Erik, schön dass es wir auch endlich geschafft haben.
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.allen_lautsprechern
+      data:
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+        media_content_type: spotify://show
+      metadata:
+        title: Tagesschau in 100 Sekunden
+        thumbnail: https://i.scdn.co/image/4fc388d42bb11104bc06f5503f6c20d743be0a8a
+        media_class: podcast
+        children_media_class: episode
+        navigateIds:
+        - {}
+        - media_content_type: spotify://library
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+        - media_content_type: spotify://current_user_saved_shows
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/current_user_saved_shows
+        - media_content_type: spotify://show
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - media_player.allen_lautsprechern
+        from: playing
+    - service: media_player.media_stop
+      data: {}
+      target:
+        entity_id: media_player.allen_lautsprechern
+mode: single
