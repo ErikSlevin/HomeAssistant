@@ -137,7 +137,7 @@ input_select:
 input_datetime:
 
   ## [Input_Datetime] Staubsaugen Beginn
-  ## Ab welcher Uhrzeit soll gereinigt werden.
+  ## zu welcher Uhrzeit soll gereinigt werden.
   staubsaugen_beginn:
     name: "Staubsaugen Beginn"
     icon: mdi:robot-vacuum
@@ -151,3 +151,28 @@ input_datetime:
     icon: mdi:robot-vacuum
     has_date: false
     has_time: true
+
+  ## [Input_Datetime] Alarm-Time
+  ## Wann soll der Schlafzimmer Alarm ausgelöst werden
+  alarm_time:
+    name: "Alarm Zeit"
+    icon: mdi:alarm
+    has_date: false
+    has_time: true
+
+  ## [Input_Datetime] Pre-Alarm-Time
+  ## Wann soll die leise Musik vor dem eigentlichen Alarm eingeschaltet werden (bsp.: 10 min vor Alarm)
+  pre_alarm:
+    name: "Pre Alarm Zeit"
+    icon: mdi:alarm
+    has_date: false
+    has_time: true
+
+# ------------- I N P U T  B O O L R A N ------------#
+input_boolean:
+
+  ## [Input_Boolean] Alarm On/Off
+  ## Aktivierung oder Deaktivierung des Alarms
+  alarm_switch:
+    name: "Alarm Ein/Ausschalten"
+    icon: mdi:alarm
