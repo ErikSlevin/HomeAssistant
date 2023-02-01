@@ -21,11 +21,11 @@
         {% set FARB = is_state('sensor.szenenauswahl',"scene.wohnzimmer_fairfax") %}
         {% set FALSE = is_state('sensor.szenenauswahl',"False") %}
         
-        {% if down == True and S > A %} False
-        {% elif down == True and S < A and S > B %} scene.wohnzimmer_hell
+        {% if down == True and S >= A %} False
+        {% elif down == True and S < A and S >= B %} scene.wohnzimmer_hell
         {% elif down == True and S < B %} scene.wohnzimmer_fairfax
-        {% elif up == True and S < C %} scene.wohnzimmer_fairfax
-        {% elif up == True and S > C and S < D %} scene.wohnzimmer_hell
+        {% elif up == True and S <= C %} scene.wohnzimmer_fairfax
+        {% elif up == True and S > C and S <= D %} scene.wohnzimmer_hell
         {% elif up == True and S > D %} False
         {% endif %}
         
