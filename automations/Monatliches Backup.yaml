@@ -1,0 +1,41 @@
+alias: Monatliches Backup
+description: ''
+trigger:
+- platform: state
+  entity_id:
+  - schedule.diskstation
+  attribute: next_event
+  for:
+    hours: 0
+    minutes: 5
+    seconds: 0
+condition:
+- condition: or
+  conditions:
+  - condition: template
+    value_template: '{{ now().day == 1 }}'
+  - condition: template
+    value_template: '{{ now().day == 10 }}'
+  - condition: template
+    value_template: '{{ now().day == 20 }}'
+action:
+- service: hassio.addon_stdin
+  data:
+    addon: 15d21743_samba_backup
+    input:
+      command: trigger
+      backup_name: '{{now().strftime(''%Y-%m-%d'')}}-HomeAssistant-Backup'
+- wait_for_trigger:
+  - platform: state
+    entity_id:
+    - sensor.samba_backup
+    from: RUNNING
+    to: SUCCEEDED
+- service: notify.gotify
+  data:
+    title: Homeassistant
+    message: Backup am {{as_timestamp(now()) | timestamp_custom('%d.%m.%Y um %T
+      Uhr')}} durchgeführt.
+mode: parallel
+max: 2
+

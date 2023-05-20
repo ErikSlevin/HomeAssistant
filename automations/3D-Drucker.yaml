@@ -1,8 +1,5 @@
-id: '1660433623646'
 alias: 3D-Drucker
-description: 'Wenn der 3D-Drucker eingeschaltet ist: Warte, bis der gemessene Energieverbrauch
-  für 1 Minute unter 15 Watt liegt. Sobald dieser Wert erreicht wurde, sende eine
-  Push-Benachrichtigung via Gotify und schalte den 3D-Druckeraus.'
+description: ''
 trigger:
 - platform: device
   type: turned_on
@@ -19,6 +16,17 @@ action:
       minutes: 15
       seconds: 0
     below: 15
+- if:
+  - condition: device
+    device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+    domain: media_player
+    entity_id: media_player.lg_b9
+    type: is_on
+  then:
+  - service: notify.fernseher
+    data:
+      message: Druck um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
+        abgeschlossen.
 - service: notify.gotify
   data:
     title: 3D Drucker
@@ -29,3 +37,4 @@ action:
   domain: switch
   enabled: true
 mode: single
+

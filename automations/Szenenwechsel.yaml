@@ -1,4 +1,3 @@
-id: '1672937116825'
 alias: Szenenwechsel
 description: Wenn der Sensor den Status ändert, wird dieser Wert in den Input-Helper
   `input_select.szenenauswahl` geschrieben. Dies stellt die zentrale Automation
@@ -19,3 +18,4 @@ action:
   target:
     entity_id: input_select.szenenauswahl
 mode: single
+

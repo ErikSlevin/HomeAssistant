@@ -1,11 +1,5 @@
-id: '1661977068386'
 alias: Küche
-description: 'Einfacher Tastendruck: Licht in der Küche wird An/Aus geschaltet.
-  Langer Tastendruck: Spotify Playlist wird abgespielt. Sollte hierbei der Fernseher
-  laufen, wird dieser auf Lautlos gestellt und der Bildschirm ausgeschaltet. Sobald
-  die Musik via Langer Langer Tastendruck wieder deaktiviert wird, wird der Fernseher
-  wieder auf die zuvor eingestellte Lautstärke gestellt und der Bildschirm eingeschaltet
-  Wenn bei aktiver Musikwiedergabe der TV eingeschaltet wird, wird die Muisk ausgeschaltet.'
+description: ''
 trigger:
 - platform: device
   device_id: e63d7afbcf7e0943762c75cef2332a73
@@ -19,17 +13,12 @@ trigger:
   type: long_push
   subtype: button1
   id: Musik
-- platform: state
-  entity_id:
-  - binary_sensor.fernseher
-  from: 'off'
-  to: 'on'
-  id: TV ON
-- platform: state
-  entity_id:
-  - media_player.lg_b9
-  from: 'off'
-  id: 'TV ON Backup '
+- platform: device
+  device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+  domain: media_player
+  entity_id: media_player.lg_b9
+  type: turned_on
+  id: TV einschalten
 condition: []
 action:
 - choose:
@@ -37,117 +26,159 @@ action:
     - condition: trigger
       id: On/Off
     sequence:
-    - type: toggle
-      device_id: 57f5ff61c232c7b17260ce91834d2320
-      entity_id: switch.kuche_licht
-      domain: switch
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: light.kuche_licht
+          state: 'off'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: scene.wohnzimmer_hell
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: scene.wohnzimmer_fairfax
+        sequence:
+        - service: switch.turn_on
+          data: {}
+          target:
+            device_id: 57f5ff61c232c7b17260ce91834d2320
+        - service: scene.turn_on
+          target:
+            entity_id: '{{ states(''sensor.szenenauswahl'') }}'
+          metadata: {}
+      - conditions:
+        - condition: state
+          entity_id: light.kuche_licht
+          state: 'off'
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: scene.wohnzimmer_hell
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: scene.wohnzimmer_fairfax
+        sequence:
+        - service: switch.turn_on
+          data: {}
+          target:
+            device_id: 57f5ff61c232c7b17260ce91834d2320
+      - conditions:
+        - condition: state
+          entity_id: light.kuche_licht
+          state: 'on'
+        sequence:
+        - service: light.turn_off
+          data:
+            transition: 2
+          target:
+            area_id:
+            - kuche
+            - wohnzimmer
   - conditions:
     - condition: trigger
       id: Musik
     sequence:
     - choose:
       - conditions:
-        - condition: or
+        - condition: not
           conditions:
-          - condition: device
-            device_id: d4ca3c37c7262ab00aebe569650ad102
-            domain: media_player
+          - condition: state
             entity_id: media_player.wohnzimmer
-            type: is_idle
-          - condition: device
-            device_id: d4ca3c37c7262ab00aebe569650ad102
-            domain: media_player
-            entity_id: media_player.wohnzimmer
-            type: is_paused
-          - condition: device
-            device_id: d4ca3c37c7262ab00aebe569650ad102
-            domain: media_player
-            entity_id: media_player.wohnzimmer
-            type: is_off
+            state: playing
         sequence:
+        - service: input_select.select_next
+          data:
+            cycle: true
+          target:
+            entity_id: input_select.playlisten
         - service: media_player.volume_set
           data:
-            volume_level: 0.45
+            volume_level: 0.36
           target:
-            entity_id: media_player.wohnzimmer
+            entity_id:
+            - media_player.wohnzimmer
+            - media_player.allen_lautsprechern
         - service: media_player.play_media
           target:
-            entity_id: media_player.mass_wohnzimmer
+            entity_id: media_player.wohnzimmer
           data:
-            media_content_id: media-source://mass/database://playlist/1
-            media_content_type: audio/flac
-          metadata:
-            title: Club Beats
-            thumbnail: https://images.weserv.nl/?w=200&url=https://i.scdn.co/image/ab67706f00000003fc4864fba215a717cb3cae5c
-            media_class: playlist
-            children_media_class:
-            navigateIds:
-            - {}
-            - media_content_type: app
-              media_content_id: media-source://mass
-            - media_content_type: music
-              media_content_id: media-source://mass/playlists
-        - service: media_player.shuffle_set
-          target:
-            entity_id: media_player.mass_wohnzimmer
-          data:
-            shuffle: true
-        - if:
-          - condition: template
-            value_template: '{{ state_attr(''media_player.lg_b9'',''is_volume_muted'')
-              == false}}'
-          then:
-          - service: media_player.volume_mute
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+              states('input_select.playlisten') }}
+            media_content_type: spotify://playlist
+          enabled: true
+        - parallel:
+          - service: media_player.shuffle_set
             data:
-              is_volume_muted: true
+              shuffle: true
             target:
-              entity_id: media_player.lg_b9
-          - service: webostv.command
-            data:
-              entity_id: media_player.lg_b9
-              command: com.webos.service.tvpower/power/turnOffScreen
+              entity_id: media_player.spotify_erik
+          - service: media_player.media_next_track
+            data: {}
+            target:
+              entity_id: media_player.wohnzimmer
+          - choose:
+            - conditions:
+              - condition: device
+                device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+                domain: media_player
+                entity_id: media_player.lg_b9
+                type: is_on
+              - condition: state
+                entity_id: media_player.lg_b9
+                attribute: is_volume_muted
+                state: false
+              sequence:
+              - service: media_player.volume_mute
+                data:
+                  is_volume_muted: true
+                target:
+                  device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+              - service: webostv.command
+                data:
+                  entity_id: media_player.lg_b9
+                  command: com.webos.service.tvpower/power/turnOffScreen
       - conditions:
-        - condition: device
-          device_id: d4ca3c37c7262ab00aebe569650ad102
-          domain: media_player
+        - condition: state
           entity_id: media_player.wohnzimmer
-          type: is_playing
+          state: playing
         sequence:
-        - service: media_player.media_stop
+        - service: media_player.turn_off
           data: {}
           target:
             entity_id: media_player.wohnzimmer
         - if:
-          - condition: template
-            value_template: '{{ state_attr(''media_player.lg_b9'',''is_volume_muted'')
-              == true}}'
+          - condition: device
+            device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+            domain: media_player
+            entity_id: media_player.lg_b9
+            type: is_on
+          - condition: state
+            entity_id: media_player.lg_b9
+            attribute: is_volume_muted
+            state: true
           then:
           - service: media_player.volume_mute
             data:
               is_volume_muted: false
             target:
-              entity_id: media_player.lg_b9
+              device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
           - service: webostv.command
             data:
               entity_id: media_player.lg_b9
               command: com.webos.service.tvpower/power/turnOnScreen
-      default: []
   - conditions:
-    - condition: or
-      conditions:
-      - condition: trigger
-        id: TV ON
-      - condition: trigger
-        id: 'TV ON Backup '
-    - condition: device
-      device_id: d4ca3c37c7262ab00aebe569650ad102
-      domain: media_player
+    - condition: trigger
+      id: TV einschalten
+    - condition: state
       entity_id: media_player.wohnzimmer
-      type: is_playing
+      state: playing
     sequence:
-    - service: media_player.media_stop
+    - service: media_player.turn_off
       data: {}
       target:
         entity_id: media_player.wohnzimmer
-  default: []
 mode: single
+

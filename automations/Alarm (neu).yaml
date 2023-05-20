@@ -1,0 +1,190 @@
+alias: Alarm (neu)
+description: ''
+trigger:
+- platform: time
+  at: input_datetime.wecker
+  id: AN
+condition:
+- condition: state
+  entity_id: input_boolean.alarm_switch
+  state: 'on'
+action:
+- service: timer.start
+  data: {}
+  target:
+    entity_id: timer.wecker
+- service: media_player.volume_set
+  data:
+    volume_level: 0.001
+  target:
+    entity_id:
+    - media_player.allen_lautsprechern
+  enabled: true
+- delay:
+    hours: 0
+    minutes: 0
+    seconds: 5
+    milliseconds: 0
+- service: media_player.play_media
+  target:
+    entity_id: media_player.allen_lautsprechern
+  data:
+    media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+      states('input_select.playlisten') }}
+    media_content_type: spotify://playlist
+  enabled: true
+- delay:
+    hours: 0
+    minutes: 0
+    seconds: 5
+    milliseconds: 0
+- service: input_select.select_next
+  data:
+    cycle: true
+  target:
+    entity_id: input_select.playlisten
+- delay:
+    hours: 0
+    minutes: 0
+    seconds: 5
+    milliseconds: 0
+- parallel:
+  - service: media_player.shuffle_set
+    data:
+      shuffle: true
+    target:
+      entity_id: media_player.spotify_erik
+  - service: media_player.media_next_track
+    data: {}
+    target:
+      entity_id: media_player.wohnzimmer
+  enabled: true
+- repeat:
+    until:
+    - condition: device
+      type: is_on
+      device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+      entity_id: light.shelly_flur
+      domain: light
+    sequence:
+    - if:
+      - condition: numeric_state
+        entity_id: media_player.allen_lautsprechern
+        attribute: volume_level
+        below: 0.44
+      then:
+      - service: media_player.volume_set
+        data:
+          volume_level: '{% set volume = state_attr(''media_player.allen_lautsprechern'',''volume_level'')
+            %} {{ volume + 0.01 }}'
+        target:
+          entity_id: media_player.allen_lautsprechern
+      else:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.flur_bewegung_erkannt
+          to: 'on'
+          from: 'off'
+  enabled: false
+- wait_for_trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.flur_bewegung_erkannt
+- service: media_player.volume_set
+  data:
+    volume_level: 0.4
+  target:
+    entity_id:
+    - media_player.wohnzimmer
+    - media_player.schlafzimmer
+- service: media_player.play_media
+  target:
+    entity_id: media_player.allen_lautsprechern
+  data:
+    media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+    media_content_type: spotify://show
+  metadata:
+    title: Tagesschau in 100 Sekunden
+    thumbnail: https://i.scdn.co/image/4fc388d42bb11104bc06f5503f6c20d743be0a8a
+    media_class: podcast
+    children_media_class: episode
+    navigateIds:
+    - {}
+    - media_content_type: spotify://library
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+    - media_content_type: spotify://current_user_saved_shows
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/current_user_saved_shows
+    - media_content_type: spotify://show
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+- wait_for_trigger:
+  - platform: device
+    device_id: 17076fc81df5839017466ac26be281b5
+    domain: media_player
+    entity_id: media_player.allen_lautsprechern
+    type: paused
+  continue_on_timeout: true
+  timeout:
+    hours: 0
+    minutes: 3
+    seconds: 0
+    milliseconds: 0
+- wait_for_trigger:
+  - platform: state
+    entity_id:
+    - timer.wecker
+    from: active
+    to: idle
+  - platform: device
+    device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+    domain: shelly
+    type: single_push
+    subtype: button1
+  timeout:
+    hours: 0
+    minutes: 40
+    seconds: 0
+    milliseconds: 0
+- service: media_player.play_media
+  target:
+    entity_id: media_player.allen_lautsprechern
+  data:
+    media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+      states('input_select.playlisten') }}
+    media_content_type: spotify://playlist
+  enabled: true
+- service: tts.google_translate_say
+  data:
+    cache: false
+    entity_id: media_player.allen_lautsprechern
+    message: 'ACHTUNG! Es ist {{ now().strftime(''%H:%M'') }} Uhr. Das aktuelle
+      Wetter in Berlin ist {{ states(''weather.home'') | replace("partlycloudy",
+      "teilweise bewölkt") | replace("cloudy", "bewölkt") | replace("sunny", "sonnig")
+      | replace("rainy", "regnerisch") }} mit einer Temperatur von  {{ state_attr(''weather.home'',
+      ''temperature'') }} Grad Celsius. Der Höchstwert für heute beträgt {{ state_attr(''weather.home'',
+      ''forecast'')[0][''temperature''] }} Grad Celsius, der Tiefstwert für heute
+      beträgt {{ state_attr(''weather.home'', ''forecast'')[0][''templow''] }} Grad
+      Celsius und die Vorhersage für heute ist: {{ state_attr(''weather.home'',
+      ''forecast'')[0][''condition''] | replace("partlycloudy", "teilweise bewölkt.")
+      | replace("cloudy", "bewölkt.") | replace("sunny", "sonnig.") | replace("rainy",
+      "regnerisch.") }} Morgenroutine wird beendet.'
+    language: de
+- wait_for_trigger:
+  - platform: device
+    device_id: 17076fc81df5839017466ac26be281b5
+    domain: media_player
+    entity_id: media_player.allen_lautsprechern
+    type: paused
+  continue_on_timeout: true
+  timeout:
+    hours: 0
+    minutes: 1
+    seconds: 0
+    milliseconds: 0
+  enabled: true
+- service: media_player.turn_off
+  data: {}
+  target:
+    entity_id: media_player.allen_lautsprechern
+mode: restart
+

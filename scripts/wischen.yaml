@@ -1,0 +1,49 @@
+alias: Wischen
+fields:
+  wassereinsatz:
+    name: Aktion
+    required: true
+    selector:
+      select:
+        options:
+        - low
+        - medium
+        - high
+sequence:
+- service: vacuum.set_fan_speed
+  data:
+    fan_speed: Gentle
+  target:
+    entity_id: vacuum.roborock_s6_maxv
+- delay:
+    hours: 0
+    minutes: 0
+    seconds: 1
+    milliseconds: 30
+- service: vacuum.send_command
+  data:
+    command: set_water_box_custom_mode
+    params: '{% if  wassereinsatz == "low" %} 201 {% elif wassereinsatz == "medium"
+      %} 202 {% elif wassereinsatz == "high" %} 203  {% endif %}'
+  target:
+    entity_id: vacuum.roborock_s6_maxv
+- delay:
+    hours: 0
+    minutes: 0
+    seconds: 1
+    milliseconds: 30
+- repeat:
+    count: 2
+    sequence:
+    - service: vacuum.start
+      data: {}
+      target:
+        entity_id: vacuum.roborock_s6_maxv
+    - wait_for_trigger:
+      - platform: device
+        device_id: 2cd40ecfe8944f706bf74609d86e46ba
+        domain: vacuum
+        entity_id: vacuum.roborock_s6_maxv
+        type: docked
+mode: single
+icon: mdi:dishwasher

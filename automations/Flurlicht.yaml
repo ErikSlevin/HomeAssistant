@@ -1,11 +1,5 @@
-id: '1654455377953'
-alias: 'Flurlicht ein-/ausschalten '
-description: 'Wenn Anwesend: Wenn Bewegung im Flur erkannt wurde (zwei Sensoren
-  - ODER Funktion) und die Sonne über den eingestellten Wert von dem Helfer `input_number.flur_licht_fruh`
-  (Früh) oder `input_number.flur_licht_abends` (Abends) ist - schalte das Flur Licht
-  ein.
-  Sobald für 15 Sekunden keine Bewegung mehr in Flur detektiert wurde (zwei Sensore
-  - UND Funktion) - schalte das Flur Licht wieder aus.'
+alias: Flurlicht
+description: ''
 trigger:
 - platform: state
   entity_id:
@@ -75,3 +69,4 @@ action:
         entity_id: light.flur
   default: []
 mode: single
+

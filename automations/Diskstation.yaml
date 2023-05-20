@@ -1,0 +1,36 @@
+alias: Diskstation
+description: ''
+trigger:
+- platform: state
+  entity_id:
+  - schedule.diskstation
+  attribute: next_event
+condition: []
+action:
+- if:
+  - condition: state
+    entity_id: binary_sensor.diskstation_ping
+    state: 'off'
+  then:
+  - service: wake_on_lan.send_magic_packet
+    data:
+      broadcast_port: 9
+      mac: 00-11-32-37-46-98
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.diskstation_ping
+      to: 'on'
+    continue_on_timeout: true
+    timeout:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  else:
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.diskstation_shutdown
+mode: single
+

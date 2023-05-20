@@ -1,280 +1,188 @@
-id: '1672891624068'
 alias: Staubsaugen
-description: "15min Abwesenheit: Zwischen den eingestellten Zeiten (`input_datetime.staubsaugen_beginn`
-  und `input_datetime.staubsaugen_ende`)\n wird die Wohnung gereinigt. \n\nZwangsreinigung:
-  Eine Zwangsreinigung ist notwendig, wenn wenn nach eine bestimmte Anzahl an Tagen
-  nicht gereinigt wurde.\n\nStaubbehälter: Nach einer Anzahl von Reinigungen (`input_number.staubsauger_entleeren`)
-  wird eine Push-Benachrichtigung versendet, dass der Behälter entleert werden soll.
-  \n\nSensoren: Wenn Sensoren gereinigt werden müssen, wird eine Push-Benachrichtigung
-  versendet und der Counter zurückgesetzt.\n\nKüche: Wenn der Küchen-Lichtschalter
-  2x schnell hintereinander gedrückt wird, wird die Küche entlang der Küchenschränke
-  (Zone) 2x gereinigt. Sollte die Reinigung zwischen 22:00 - 07:00 Uhr durchgeführt
-  werden, wird der Turbo-Modus deaktiviert und ein Leiser-Modus für diese Reinigung
-  ausgewählt."
+description: ''
 trigger:
 - platform: state
   entity_id:
   - binary_sensor.anwesend
-  from: 'on'
-  to: 'off'
-  id: Abwesenheit
   for:
     hours: 0
     minutes: 10
     seconds: 0
+  id: Abwesenheit
+  from: 'on'
+  to: 'off'
 - platform: time
   at: input_datetime.staubsaugen_beginn
-  id: Start
-- platform: state
-  entity_id:
-  - binary_sensor.staubsauger_entleeren
-  from: 'off'
-  to: 'on'
-  id: Staubbehälter
-- platform: state
-  entity_id:
-  - sensor.staubsauger_sensoren_reinigen
-  from: 'False'
-  id: Sensoren
+  id: Staubsaugen beginnen
 - platform: device
   device_id: e63d7afbcf7e0943762c75cef2332a73
   domain: shelly
   type: double_push
   subtype: button1
-  id: Küche
+  id: Küche staubsaugen
+- platform: state
+  entity_id:
+  - binary_sensor.staubsauger_alle_sensoren
+  from: 'off'
+  to: 'on'
+  id: Sensoren Reinigen
+- platform: time
+  at: 00:00:01
+  id: Sensor zurücksetzen
+- platform: state
+  entity_id:
+  - binary_sensor.staubsauger_behaelter_entleeren
+  from: 'off'
+  to: 'on'
+  id: Behälter entleeren
 condition: []
 action:
 - choose:
+  - conditions:
+    - condition: trigger
+      id: Sensor zurücksetzen
+    - condition: state
+      entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+      state: 'on'
+    sequence:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.staubsauger_heute_gestaubsaugt
   - conditions:
     - condition: or
       conditions:
       - condition: trigger
         id: Abwesenheit
       - condition: trigger
-        id: Start
-    - condition: state
-      entity_id: binary_sensor.anwesend
-      state: 'off'
-      for:
-        hours: 0
-        minutes: 10
-        seconds: 0
+        id: Staubsaugen beginnen
     - condition: state
       entity_id: binary_sensor.staubsauger_heute_reinigung_notwendig
       state: 'on'
+    - condition: state
+      entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+      state: 'off'
+      enabled: true
+    - condition: state
+      entity_id: vacuum.roborock_s6_maxv
+      state: docked
     - condition: time
       after: input_datetime.staubsaugen_beginn
       before: input_datetime.staubsaugen_ende
-    - condition: state
-      entity_id: vacuum.roborock_vacuum_a10
-      state: docked
     sequence:
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: Reinigung bei Abwesenheit um {{as_timestamp(now()) | timestamp_custom('%H:%M
-          Uhr')}} gestartet.
-    - service: vacuum.start
-      data: {}
-      target:
-        entity_id: vacuum.roborock_vacuum_a10
-    - wait_for_trigger:
-      - platform: state
-        entity_id:
-        - vacuum.roborock_vacuum_a10
-        from: cleaning
-        to: returning
-      - platform: state
-        entity_id:
-        - vacuum.roborock_vacuum_a10
-        from: cleaning
-        to: error
-      timeout:
-        hours: 2
-        minutes: 0
-        seconds: 0
-        milliseconds: 0
-      continue_on_timeout: true
     - choose:
       - conditions:
         - condition: state
-          entity_id: vacuum.roborock_vacuum_a10
-          state: returning
+          entity_id: binary_sensor.anwesend
+          state: 'off'
+        sequence:
+        - service: script.staubsaugen
+          data:
+            zustand: Abwesenheit
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.staubsauger_zwangsreinigung
+          state: 'on'
+        sequence:
+        - service: script.staubsaugen
+          data:
+            zustand: Zwangsreinigung
+  - conditions:
+    - condition: trigger
+      id: Küche staubsaugen
+    sequence:
+    - service: script.staubsaugen
+      data:
+        zustand: Zonenreinigung
+  - conditions:
+    - condition: or
+      conditions:
+      - condition: trigger
+        id: Sensoren Reinigen
+      - condition: trigger
+        id: Behälter entleeren
+    sequence:
+    - if:
+      - condition: state
+        entity_id: binary_sensor.anwesend
+        state: 'off'
+      then:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.anwesend
+          from: 'off'
+          to: 'on'
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 0
+        timeout:
+          hours: 48
+          minutes: 0
+          seconds: 0
+          milliseconds: 0
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.staubsauger_hauptbuerste
+          state: 'on'
+        sequence:
+        - service: notify.gotify
+          data:
+            message: Hauptbürste bitte reinigen!
+            title: Roborock S6 MaxV
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.staubsauger_hauptbuerste
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.staubsauger_seitenbuerste
+          state: 'on'
+        sequence:
+        - service: notify.gotify
+          data:
+            message: Seitenbürste bitte reinigen!
+            title: Roborock S6 MaxV
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.staubsauger_seitenbuerste
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.staubsauger_filter
+          state: 'on'
+        sequence:
+        - service: notify.gotify
+          data:
+            message: Filter bitte reinigen!
+            title: Roborock S6 MaxV
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.staubsauger_seitenbuerste
+      - conditions:
+        - condition: state
+          entity_id: binary_sensor.staubsauger_kamerasensoren
+          state: 'on'
+        sequence:
+        - service: notify.gotify
+          data:
+            message: Seitenbürste bitte reinigen!
+            title: Roborock S6 MaxV
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.staubsauger_seitenbuerste
+      - conditions:
+        - condition: trigger
+          id: Behälter entleeren
         sequence:
         - service: notify.gotify
           data:
             title: Roborock S6 MaxV
-            message: Reinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
-              Uhr')}} abgeschlossen.
-      - conditions:
-        - condition: state
-          entity_id: vacuum.roborock_vacuum_a10
-          state: error
-        sequence:
-        - service: notify.gotify
-          data:
-            title: Roborock S6 MaxV - Error!
-            message: Reinigung wegen eines Fehlers um {{as_timestamp(now()) | timestamp_custom('%H:%M
-              Uhr')}} abgebrochen.
-  - conditions:
-    - condition: trigger
-      id: Staubbehälter
-    sequence:
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: Staubbehälter entleeren - {{states('input_number.staubsauger_entleeren')
-          | int }} Reinigungen wurden durchgeführt.
-  - conditions:
-    - condition: trigger
-      id: Sensoren
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: sensor.staubsauger_sensoren_reinigen
-        state: unavailable
-    sequence:
-    - service: notify.gotify
-      data:
-        title: Roborock S6 MaxV
-        message: '{{states(''sensor.staubsauger_sensoren_reinigen'')}}
-          '
-    - choose:
-      - conditions:
-        - condition: numeric_state
-          entity_id: sensor.roborock_vacuum_a10_main_brush_left
-          below: 0
-        sequence:
-        - service: vacuum.send_command
-          data:
-            command: reset_consumable
-            params:
-            - main_brush_work_time
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-      - conditions:
-        - condition: numeric_state
-          entity_id: sensor.roborock_vacuum_a10_side_brush_left
-          below: 0
-        sequence:
-        - service: vacuum.send_command
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-          data:
-            command: reset_consumable
-            params:
-            - side_brush_work_time
-      - conditions:
-        - condition: numeric_state
-          entity_id: sensor.roborock_vacuum_a10_filter_left
-          below: 0
-        sequence:
-        - service: vacuum.send_command
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-          data:
-            command: reset_consumable
-            params:
-            - filter_work_time
-      - conditions:
-        - condition: numeric_state
-          entity_id: sensor.roborock_vacuum_a10_sensor_dirty_left
-          below: 0
-        sequence:
-        - service: vacuum.send_command
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-          data:
-            command: reset_consumable
-            params:
-            - sensor_dirty_time
-  - conditions:
-    - condition: trigger
-      id: Küche
-    sequence:
-    - service: xiaomi_miio.vacuum_clean_zone
-      data:
-        zone:
-        - - 20117
-          - 22994
-          - 21417
-          - 26594
-        repeats: 2
-      target:
-        entity_id: vacuum.roborock_vacuum_a10
-    - choose:
-      - conditions:
-        - condition: time
-          after: 07:00:00
-          before: '22:00:00'
-        sequence:
-        - service: xiaomi_miio.vacuum_clean_zone
-          data:
-            zone:
-            - - 20117
-              - 22994
-              - 21417
-              - 26594
-            repeats: 2
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-        - wait_for_trigger:
-          - platform: state
-            entity_id:
-            - vacuum.roborock_vacuum_a10
-            from: cleaning
-            to: returning
-          - platform: state
-            entity_id:
-            - vacuum.roborock_vacuum_a10
-            from: cleaning
-            to: error
-          timeout:
-            hours: 0
-            minutes: 5
-            seconds: 0
-            milliseconds: 0
-          continue_on_timeout: true
-      - conditions:
-        - condition: time
-          after: '22:00:01'
-          before: 06:59:59
-        sequence:
-        - service: xiaomi_miio.vacuum_clean_zone
-          data:
-            zone:
-            - - 20117
-              - 22994
-              - 21417
-              - 26594
-            repeats: 3
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-        - service: vacuum.set_fan_speed
-          data:
-            fan_speed: Standard
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-        - wait_for_trigger:
-          - platform: state
-            entity_id:
-            - vacuum.roborock_vacuum_a10
-            from: cleaning
-            to: returning
-          - platform: state
-            entity_id:
-            - vacuum.roborock_vacuum_a10
-            from: cleaning
-            to: error
-          timeout:
-            hours: 0
-            minutes: 5
-            seconds: 0
-            milliseconds: 0
-          continue_on_timeout: true
-        - service: vacuum.set_fan_speed
-          data:
-            fan_speed: Turbo
-          target:
-            entity_id: vacuum.roborock_vacuum_a10
-mode: single
+            message: Staubbehälter bitte entleeren!
+mode: parallel
+max: 10
+

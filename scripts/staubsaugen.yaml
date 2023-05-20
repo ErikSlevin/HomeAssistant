@@ -1,0 +1,97 @@
+alias: Staubsaugen
+fields:
+  zustand:
+    name: Aktion
+    required: true
+    selector:
+      select:
+        options:
+        - Zonenreinigung
+        - Zwangsreinigung
+        - Abwesenheit
+sequence:
+- service: notify.gotify
+  data:
+    title: Roborock S6 MaxV
+    message: "{% if zustand == \"Zonenreinigung\" %} \n  Zonenreinigung um {{as_timestamp(now())
+      | timestamp_custom('%H:%M Uhr')}} gestartet.\n{% elif zustand == \"Zwangsreinigung\"
+      %}          \n  Zwangsreinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+      Uhr')}} gestartet, da seit {{states('input_number.nach_tagen_reinigen')}}
+      Tagen nicht mehr gereinigt wurde.\n{% elif zustand == \"Abwesenheit\" %}          \n
+      \ Reinigung bei Abwesenheit um {{as_timestamp(now()) | timestamp_custom('%H:%M
+      Uhr')}}.\n{% endif %}"
+- if:
+  - condition: time
+    after: input_datetime.staubsaugen_beginn
+    before: input_datetime.staubsaugen_ende
+  then:
+  - service: vacuum.set_fan_speed
+    data:
+      fan_speed: Turbo
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+  else:
+  - service: vacuum.set_fan_speed
+    data:
+      fan_speed: Standard
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+- if:
+  - condition: template
+    value_template: '{{ zustand == "Zonenreinigung" }}'
+  then:
+  - service: xiaomi_miio.vacuum_clean_zone
+    data:
+      zone:
+      - - 20117
+        - 22994
+        - 21417
+        - 26594
+      repeats: 2
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+  else:
+  - service: vacuum.start
+    data: {}
+    enabled: true
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+  - service: input_datetime.set_datetime
+    data:
+      date: '{{ now().strftime(''%Y-%m-%d'') }}'
+    target:
+      entity_id: input_datetime.letzte_reinigung
+  - service: counter.increment
+    data: {}
+    target:
+      entity_id: counter.reinigung
+- wait_for_trigger:
+  - platform: state
+    entity_id:
+    - vacuum.roborock_s6_maxv
+    to: docked
+  - platform: state
+    entity_id:
+    - vacuum.roborock_s6_maxv
+    to: error
+  continue_on_timeout: true
+  timeout:
+    hours: 1
+    minutes: 10
+    seconds: 0
+    milliseconds: 0
+- service: notify.gotify
+  data:
+    title: Roborock S6 MaxV
+    message: "{% if zustand == \"Zonenreinigung\" %} \n  Zonenreinigung um {{as_timestamp(now())
+      | timestamp_custom('%H:%M Uhr')}} beendet.\n{% elif zustand == \"Zwangsreinigung\"
+      %}          \n  Zwangsreinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+      Uhr')}} beendet.\n{% elif zustand == \"Abwesenheit\" %}          \n  Reinigung
+      bei Abwesenheit um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
+      beendet.\n{% endif %}"
+mode: restart
+icon: mdi:robot-vacuum

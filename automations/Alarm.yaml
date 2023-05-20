@@ -1,12 +1,57 @@
-id: '1675208635458'
 alias: Alarm
-description: 'Sanft Wecken: Wenn sich die Alarmzeit ändert, wird automatisch der
-  Input-Helper für den Pre-Alarm aktualisiert (10min vorher)'
+description: 'Die Home-Assistant Automation "Alarm" ist eine komplexe Automatisierung,
+  die verschiedene Aktionen ausführt, um einen sanften Weckvorgang zu ermöglichen.
+  Sie basiert auf drei verschiedenen Trigger-Events: der Änderung der Alarmzeit,
+  dem Erreichen des Pre-Alarm-Zeitpunkts und dem Erfassen von Bewegungen im Haus.
+  Der Zweck dieser Automatisierung ist es, ein angenehmes und schrittweises Erwachen
+  zu ermöglichen, das den Schlaf nicht stört.
+
+
+  Die Automatisierung beginnt mit dem Trigger-Event "Alarm_Change", der ausgelöst
+  wird, wenn sich die Alarmzeit ändert. Dies wird durch die Überwachung des Sensors
+  "sensor.dn2103_next_alarm" erreicht. Sobald der Trigger ausgelöst wird, führt
+  die Automatisierung verschiedene Aktionen aus. Zunächst wird der "Pre-Alarm" Input-Helper
+  aktualisiert, der 10 Minuten vor dem eigentlichen Alarm klingeln soll. Dies wird
+  durch die Service-Call "input_datetime.set_datetime" realisiert. Der Pre-Alarm
+  wird so programmiert, dass er 10 Minuten vor dem Alarmton ertönt.
+
+
+  Als Nächstes wird der "after_alarm" Input-Helper aktualisiert, der 10 Minuten
+  nach dem Alarm klingeln soll. Dies wird durch die gleiche Service-Call "input_datetime.set_datetime"
+  realisiert. Die Service-Call "input_boolean.turn_on" aktiviert das Input-Helper
+  "alarm_switch", um das Abspielen von Musik im nächsten Schritt zu ermöglichen.
+
+
+  Anschließend erfolgt die Benachrichtigung über das Stellen des Alarms. Eine Sprachnachricht
+  wird über den Google Text-to-Speech-Service erstellt und an alle angeschlossenen
+  Lautsprecher im Haus gesendet, um die Alarmzeit bekannt zu geben. Die Sprachnachricht
+  wird von der Service-Call "tts.google_translate_say" ausgeführt.
+
+
+  Der zweite Trigger-Event "Pre-Alarm" wird ausgelöst, wenn die voreingestellte
+  Zeit für den Pre-Alarm erreicht ist. Dieser Trigger-Event wird nur ausgelöst,
+  wenn der "alarm_switch" aktiviert ist. Sobald der Trigger-Event ausgelöst wird,
+  wird die Lautstärke aller angeschlossenen Lautsprecher auf 0 gestellt, gefolgt
+  von einer Verzögerung von 7 Sekunden. Dann wird die Musik abgespielt. Diese Musik
+  wird über die Service-Call "media_player.play_media" auf den angeschlossenen Lautsprechern
+  abgespielt. Die Playlist "Sleepy Piano" auf Spotify wird abgespielt, um ein sanftes
+  Aufwachen zu ermöglichen. Nach 7 Sekunden erfolgt die Skriptausführung "fade_volume",
+  die die Lautstärke in einer Minute auf 50% erhöht. Eine weitere Verzögerung von
+  1 Minute und 5 Sekunden wird hinzugefügt, bevor die Lautstärke auf 45% gesetzt
+  wird.
+
+
+  Der dritte Trigger-Event "Alarm_aus" wird ausgelöst, wenn Bewegungen im Flur erkannt
+  werden. Sobald der Trigger ausgelöst wird, werden alle angeschlossenen Lautsprecher
+  ausgeschaltet und die Musik wird gestoppt. Die Service-Call "media_player.turn_off"
+  schaltet alle angeschlossenen Lautsprecher aus, und die Service-Call "media_player.media_stop"
+  stoppt'
 trigger:
 - platform: state
   entity_id:
-  - input_datetime.alarm_time
+  - sensor.dn2103_next_alarm
   id: Alarm_Change
+  attribute: Local Time
 - platform: time
   at: input_datetime.pre_alarm
   id: Pre-Alarm
@@ -15,8 +60,21 @@ trigger:
   - binary_sensor.flur_bewegung_erkannt
   from: 'off'
   to: 'on'
-  id: Aufgestanden
-condition: []
+  id: Alarm_aus
+condition:
+- condition: not
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.dn2103_next_alarm
+      state: unavailable
+    - condition: state
+      entity_id: sensor.dn2103_next_alarm
+      state: unknown
+- condition: state
+  entity_id: binary_sensor.anwesend
+  state: 'on'
 action:
 - choose:
   - conditions:
@@ -25,23 +83,41 @@ action:
     sequence:
     - service: input_datetime.set_datetime
       data:
-        time: '{{ as_timestamp(today_at(states(''input_datetime.alarm_time'')) -
-          timedelta(minutes = 10 )) | timestamp_custom("%H:%M", true)}}'
+        datetime: '{{ (as_timestamp(states(''sensor.dn2103_next_alarm'')) - 300)
+          | as_datetime | as_local }}'
       target:
         entity_id: input_datetime.pre_alarm
+    - service: input_datetime.set_datetime
+      data:
+        datetime: '{{ (as_timestamp(states(''sensor.dn2103_next_alarm'')) + 600)
+          | as_datetime | as_local }}'
+      target:
+        entity_id: input_datetime.after_alarm
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.alarm_switch
+    - service: tts.google_translate_say
+      data:
+        cache: true
+        message: Der Wecker wurde auf {% set t = strptime(state_attr('sensor.dn2103_next_alarm',
+          'Local Time'), '%a %b %d %H:%M:%S %Z%z %Y') %} {{ t.hour }}:{{ t.minute
+          }} Uhr gestellt. Gute Nacht.
+        language: de
+        entity_id: media_player.allen_lautsprechern
   - conditions:
     - condition: trigger
       id: Pre-Alarm
     - condition: state
-      entity_id: binary_sensor.anwesend
+      entity_id: input_boolean.alarm_switch
       state: 'on'
     sequence:
     - service: media_player.volume_set
       data:
         volume_level: 0
+      enabled: true
       target:
-        entity_id:
-        - media_player.schlafzimmer
+        entity_id: media_player.allen_lautsprechern
     - delay:
         hours: 0
         minutes: 0
@@ -49,7 +125,7 @@ action:
         milliseconds: 0
     - service: media_player.play_media
       target:
-        entity_id: media_player.schlafzimmer
+        entity_id: media_player.allen_lautsprechern
       data:
         media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:37i9dQZF1DX03b46zi3S82
         media_content_type: spotify://playlist
@@ -76,33 +152,20 @@ action:
     - service: script.fade_volume
       data:
         curve: linear
-        target_player: media_player.schlafzimmer
-        duration: 120
-        target_volume: 0.5
-  - conditions:
-    - condition: trigger
-      id: Aufgestanden
-    - condition: state
-      entity_id: binary_sensor.anwesend
-      state: 'on'
-    - condition: device
-      device_id: 44ec07205b7efd3b49e48d086b2d77a3
-      domain: media_player
-      entity_id: media_player.schlafzimmer
-      type: is_playing
-    sequence:
+        target_player: media_player.allen_lautsprechern
+        duration: 60
+        target_volume: 0.4
+    - delay:
+        hours: 0
+        minutes: 1
+        seconds: 5
+        milliseconds: 0
     - service: media_player.volume_set
       data:
         volume_level: 0.4
+      enabled: true
       target:
-        entity_id:
-        - media_player.allen_lautsprechern
-    - service: tts.google_translate_say
-      data:
         entity_id: media_player.allen_lautsprechern
-        language: de
-        cache: true
-        message: Guten Morgen Erik, schön dass es wir auch endlich geschafft haben.
     - service: media_player.play_media
       target:
         entity_id: media_player.allen_lautsprechern
@@ -123,12 +186,66 @@ action:
         - media_content_type: spotify://show
           media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
     - wait_for_trigger:
-      - platform: state
-        entity_id:
-        - media_player.allen_lautsprechern
-        from: playing
+      - platform: device
+        device_id: d4ca3c37c7262ab00aebe569650ad102
+        domain: media_player
+        entity_id: media_player.wohnzimmer
+        type: paused
+    - service: media_player.play_media
+      target:
+        entity_id: media_player.allen_lautsprechern
+      data:
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:4r2twUYtviwpCpFnrfkkgM
+        media_content_type: spotify://playlist
+      enabled: true
+    - service: media_player.volume_set
+      data:
+        volume_level: 45
+      enabled: true
+      target:
+        entity_id: media_player.allen_lautsprechern
+    - delay:
+        hours: 0
+        minutes: 5
+        seconds: 0
+        milliseconds: 0
+    - if:
+      - condition: or
+        conditions:
+        - condition: device
+          device_id: 44ec07205b7efd3b49e48d086b2d77a3
+          domain: media_player
+          entity_id: media_player.schlafzimmer
+          type: is_playing
+        - condition: device
+          device_id: d4ca3c37c7262ab00aebe569650ad102
+          domain: media_player
+          entity_id: media_player.wohnzimmer
+          type: is_playing
+      then:
+      - service: media_player.media_stop
+        data: {}
+        target:
+          entity_id: media_player.allen_lautsprechern
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.alarm_switch
+  - conditions:
+    - condition: trigger
+      id: Alarm_aus
+    - condition: time
+      after: input_datetime.pre_alarm
+      before: input_datetime.after_alarm
+    sequence:
     - service: media_player.media_stop
       data: {}
       target:
-        entity_id: media_player.allen_lautsprechern
+        entity_id:
+        - media_player.allen_lautsprechern
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.alarm_switch
 mode: single
+
