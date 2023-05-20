@@ -63,14 +63,199 @@ fade_volume:
       - service: media_player.volume_set
         data_template:
           entity_id: '{{ target_player }}'
-          volume_level: "{% set t = repeat.index / total_steps %} {% if curve == 'logarithmic'\
-            \ %}\n  {{ (start_volume + (t / (1 + (1 - t))) * start_diff) | float(0)\
-            \ }}\n{% elif curve == 'bezier' %}\n  {{ (start_volume + (t * t * (3 -\
-            \ 2 * t)) * start_diff) | float(0) }}\n{% else %}\n  {{ (start_volume\
-            \ + t * start_diff) | float(0) }}\n{% endif %}\n"
+          volume_level: "{% set t = repeat.index / total_steps %} {% if curve == 'logarithmic'
+            %}\n  {{ (start_volume + (t / (1 + (1 - t))) * start_diff) | float(0)
+            }}\n{% elif curve == 'bezier' %}\n  {{ (start_volume + (t * t * (3 - 2
+            * t)) * start_diff) | float(0) }}\n{% else %}\n  {{ (start_volume + t
+            * start_diff) | float(0) }}\n{% endif %}\n"
       - delay: '00:00:00.1'
   - service: media_player.volume_set
     data_template:
       entity_id: '{{ target_player }}'
       volume_level: '{{ target_volume }}'
   icon: mdi:tune-vertical
+staubsaugen:
+  alias: Staubsaugen
+  fields:
+    zustand:
+      name: Aktion
+      required: true
+      selector:
+        select:
+          options:
+          - Zonenreinigung
+          - Zwangsreinigung
+          - Abwesenheit
+  sequence:
+  - service: notify.gotify
+    data:
+      title: Roborock S6 MaxV
+      message: "{% if zustand == \"Zonenreinigung\" %} \n  Zonenreinigung um {{as_timestamp(now())
+        | timestamp_custom('%H:%M Uhr')}} gestartet.\n{% elif zustand == \"Zwangsreinigung\"
+        %}          \n  Zwangsreinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+        Uhr')}} gestartet, da seit {{states('input_number.nach_tagen_reinigen')}}
+        Tagen nicht mehr gereinigt wurde.\n{% elif zustand == \"Abwesenheit\" %}          \n
+        \ Reinigung bei Abwesenheit um {{as_timestamp(now()) | timestamp_custom('%H:%M
+        Uhr')}}.\n{% endif %}"
+  - if:
+    - condition: time
+      after: input_datetime.staubsaugen_beginn
+      before: input_datetime.staubsaugen_ende
+    then:
+    - service: vacuum.set_fan_speed
+      data:
+        fan_speed: Turbo
+      target:
+        entity_id: vacuum.roborock_s6_maxv
+    else:
+    - service: vacuum.set_fan_speed
+      data:
+        fan_speed: Standard
+      target:
+        entity_id: vacuum.roborock_s6_maxv
+  - if:
+    - condition: template
+      value_template: '{{ zustand == "Zonenreinigung" }}'
+    then:
+    - service: xiaomi_miio.vacuum_clean_zone
+      data:
+        zone:
+        - - 20117
+          - 22994
+          - 21417
+          - 26594
+        repeats: 2
+      target:
+        entity_id: vacuum.roborock_s6_maxv
+    else:
+    - service: vacuum.start
+      data: {}
+      enabled: true
+      target:
+        entity_id: vacuum.roborock_s6_maxv
+    - service: input_boolean.turn_on
+      data: {}
+      target:
+        entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+    - service: input_datetime.set_datetime
+      data:
+        date: '{{ now().strftime(''%Y-%m-%d'') }}'
+      target:
+        entity_id: input_datetime.letzte_reinigung
+    - service: counter.increment
+      data: {}
+      target:
+        entity_id: counter.reinigung
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - vacuum.roborock_s6_maxv
+      to: docked
+    - platform: state
+      entity_id:
+      - vacuum.roborock_s6_maxv
+      to: error
+    continue_on_timeout: true
+    timeout:
+      hours: 1
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - service: notify.gotify
+    data:
+      title: Roborock S6 MaxV
+      message: "{% if zustand == \"Zonenreinigung\" %} \n  Zonenreinigung um {{as_timestamp(now())
+        | timestamp_custom('%H:%M Uhr')}} beendet.\n{% elif zustand == \"Zwangsreinigung\"
+        %}          \n  Zwangsreinigung um {{as_timestamp(now()) | timestamp_custom('%H:%M
+        Uhr')}} beendet.\n{% elif zustand == \"Abwesenheit\" %}          \n  Reinigung
+        bei Abwesenheit um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
+        beendet.\n{% endif %}"
+  mode: restart
+  icon: mdi:robot-vacuum
+wischen:
+  alias: Wischen
+  fields:
+    wassereinsatz:
+      name: Aktion
+      required: true
+      selector:
+        select:
+          options:
+          - low
+          - medium
+          - high
+  sequence:
+  - service: vacuum.set_fan_speed
+    data:
+      fan_speed: Gentle
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 30
+  - service: vacuum.send_command
+    data:
+      command: set_water_box_custom_mode
+      params: '{% if  wassereinsatz == "low" %} 201 {% elif wassereinsatz == "medium"
+        %} 202 {% elif wassereinsatz == "high" %} 203  {% endif %}'
+    target:
+      entity_id: vacuum.roborock_s6_maxv
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 30
+  - repeat:
+      count: 2
+      sequence:
+      - service: vacuum.start
+        data: {}
+        target:
+          entity_id: vacuum.roborock_s6_maxv
+      - wait_for_trigger:
+        - platform: device
+          device_id: 2cd40ecfe8944f706bf74609d86e46ba
+          domain: vacuum
+          entity_id: vacuum.roborock_s6_maxv
+          type: docked
+  mode: single
+  icon: mdi:dishwasher
+sleepmodus:
+  alias: Sleepmodus
+  sequence:
+  - delay:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - repeat:
+      until:
+      - condition: numeric_state
+        entity_id: media_player.lg_b9
+        attribute: volume_level
+        below: 0.01
+      sequence:
+      - service: media_player.volume_down
+        data: {}
+        target:
+          entity_id: media_player.lg_b9
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+  - service: light.turn_off
+    data:
+      transition: 30
+    target:
+      area_id:
+      - kuche
+      - wohnzimmer
+  - service: media_player.turn_off
+    data: {}
+    target:
+      entity_id: media_player.lg_b9
+  mode: single
+  icon: mdi:bed-clock

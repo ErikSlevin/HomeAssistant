@@ -1,8 +1,10 @@
 - platform: template
   sensors:
-  
-    ## [Licht] TV-Beleuchtung
-    ## Abhängig vom Sonnenstand wird eine Hue-Szene ausgewählt und in einer Automation automatisch gesetzt
+
+    # Kategorie: Licht
+    # Name: TV-Beleuchtung
+    # Beschreibung: Abhängig vom Sonnenstand wird eine Hue-Szene ausgewählt und in einer Automation automatisch gesetzt
+    # Letzte Anpassung: 20.05.2023
     szenenauswahl:
       friendly_name: "Szenenauswahl"
       icon_template: >-
@@ -28,9 +30,11 @@
         {% elif up == True and S > C and S <= D %} scene.wohnzimmer_hell
         {% elif up == True and S > D %} False
         {% endif %}
-        
-    ## [Allgemein] 3D-Drucker
-    ## Anhand des gemessenden Energieverbrauches wird der Status wiedergegeben
+
+    # Kategorie: Allgemein
+    # Name: 3D-Drucker
+    # Beschreibung: Anhand des gemessenen Energieverbrauchs wird der Status wiedergegeben
+    # Letzte Anpassung: 20.05.2023
     3d_drucker:
       friendly_name: "3D Drucker"
       icon_template: mdi:printer-3d
@@ -41,8 +45,10 @@
         {% elif t > 15 %} druckt
         {% endif %}
 
-    ## [Allgemein] Sonnen Auf/Untergang
-    ## Gibt entweder Sonnenaufgang oder Sonnenuntergang aus
+    # Kategorie: Allgemein
+    # Name: Sonnen Auf/Untergang
+    # Beschreibung: Gibt entweder Sonnenaufgang oder Sonnenuntergang aus
+    # Letzte Anpassung: 20.05.2023
     sonnenaufgang:
       friendly_name: "Sonnen Auf/Untergang"
       icon_template: >-
@@ -55,8 +61,10 @@
         {% else %} Sonnenuntergang
         {% endif %}
 
-    ## [Allgemein] Sonnenstand
-    ## Gibt die Elevation der Sonne in Grad aus
+    # Kategorie: Allgemein
+    # Name: Sonnenstand
+    # Beschreibung: Gibt die Elevation der Sonne in Grad aus
+    # Letzte Anpassung: 20.05.2023
     sonnenstand:
       friendly_name: "Sonnenstand"
       unit_of_measurement: '°'
@@ -65,32 +73,40 @@
         {% if sun != 'unknown' or sun != 'unavailable' %} {{state_attr('sun.sun','elevation')}}
         {% endif %}
         
-    ## [Klima] Außen Temperatur
-    ## Temperatur von dem eingestellter Standort  
+    # Kategorie: Klima
+    # Name: Außen Temperatur
+    # Beschreibung: Temperatur von dem eingestellten Standort
+    # Letzte Anpassung: 20.05.2023
     aussen_temperatur:
       friendly_name: "Außentemperatur"
       icon_template: mdi:thermometer
       unit_of_measurement: '°C'
       value_template: "{{state_attr('weather.home','temperature') }}"
-
-    ## [Klima] Außen Luftfeuchtigkeit
-    ## Luftfeuchtigkeit von dem eingestellter Standort      
+      
+    # Kategorie: Klima
+    # Name: Außen Luftfeuchtigkeit
+    # Beschreibung: Luftfeuchtigkeit von dem eingestellten Standort
+    # Letzte Anpassung: 20.05.2023  
     aussen_humidity:
       friendly_name: "Außen Luftfeuchtigkeit"
       icon_template: mdi:water-percent
       unit_of_measurement: '°C'
       value_template: "{{state_attr('weather.home','humidity') }}"
 
-    ## [Klima] Wohnzimmer Soll-Temperatur
-    ## Eingestellte Soll-Temperatur im Wohnzimmer
+    # Kategorie: Klima
+    # Name: Wohnzimmer Soll-Temperatur
+    # Beschreibung: Eingestellte Soll-Temperatur im Wohnzimmer
+    # Letzte Anpassung: 20.05.2023
     wohnzimmer_soll_temperatur:
       friendly_name: "Wohnzimmer Soll-Temperatur"
       icon_template: mdi:thermometer-high
       unit_of_measurement: '°C'
       value_template: "{{state_attr('climate.wohnzimmer','temperature') }}"
 
-    ## [Klima] Wohnzimmer Heizungslevel 
-    ## Heizungslevel Durchschnitt der zwei Heizungen
+    # Kategorie: Klima
+    # Name: Wohnzimmer Heizungslevel
+    # Beschreibung: Heizungslevel Durchschnitt der zwei Heizungen
+    # Letzte Anpassung: 20.05.2023
     wohnzimmer_heizungen:
       friendly_name: "Heizungslevel"
       icon_template: mdi:radiator
@@ -99,24 +115,28 @@
         {%set rechts = float(states('sensor.heizung_rechts_heating')) %}
         {{ (links + rechts) / 2}}
 
-    ## [Klima] Büro Soll-Temperatur
-    ## Eingestellte Soll-Temperatur im Büro
+    # Kategorie: Klima
+    # Name: Büro Soll-Temperatur
+    # Beschreibung: Eingestellte Soll-Temperatur im Büro
+    # Letzte Anpassung: 20.05.2023
     buero_soll_temperatur:
       friendly_name: "Büro Soll-Temperatur"
       icon_template: mdi:thermometer-high
       unit_of_measurement: '°C'
       value_template: "{{state_attr('climate.buro','temperature') }}"
 
-    ## [Staubsauger] Sensoren reinigen
-    ## False, wenn kein Sensor gereinigt werden muss. Gibt den jeweiligen Sensor als String zurück, wenn Reinigung notwenidg
+    # Kategorie: Staubsauger
+    # Name: Sensoren reinigen
+    # Beschreibung: False, wenn kein Sensor gereinigt werden muss. Gibt den jeweiligen Sensor als String zurück, wenn Reinigung notwendig
+    # Letzte Anpassung: 20.05.2023
     staubsauger_sensoren_reinigen:
       friendly_name: "Sensoren reinigen"
       icon_template: mdi:spray-bottle
       value_template: >-      
-        {% set mbr = states('sensor.roborock_vacuum_a10_main_brush_left') | int %}
-        {% set sbr = states('sensor.roborock_vacuum_a10_side_brush_left') | int %}
-        {% set fil = states('sensor.roborock_vacuum_a10_filter_left') | int %}
-        {% set sen = states('sensor.roborock_vacuum_a10_sensor_dirty_left') | int %}
+        {% set mbr = states('sensor.roborock_s6_maxv_main_brush_left') | int %}
+        {% set sbr = states('sensor.roborock_s6_maxv_side_brush_left') | int %}
+        {% set fil = states('sensor.roborock_s6_maxv_filter_left') | int %}
+        {% set sen = states('sensor.roborock_s6_maxv_sensor_dirty_left') | int %}
 
         {% if (mbr>0) and (sbr>0) and (fil>0) and (sen>0) %} {{false}}
         {% elif mbr < 0 %} Hauptbürste reinigen {{(mbr/3600)|int}}/300 Stunden - Sensor wird zurück gesetzt.
@@ -124,26 +144,40 @@
         {% elif fil < 0 %} Filter reinigen {{(fil/3600)|int}}/150 Stunden - Sensor wird zurück gesetzt.
         {% elif sen < 0 %} Sensoren reinigen {{(sen/3600)|int}}/30 Stunden - Sensor wird zurück gesetzt.
         {% endif %}
-        
-    ## [Staubsauger] Staubbehälter leeren (Datum)
-    ## Gibt das Datum zurück, wann der Behälter entleert werden muss,wenn wenn täglich gereinigt wird
+
+    # Kategorie: Staubsauger
+    # Name: Staubbehälter leeren (Datum)
+    # Beschreibung: Gibt das Datum zurück, wann der Behälter entleert werden muss, wenn täglich gereinigt wird
+    # Letzte Anpassung: 20.05.2023
     staubsauger_entleeren_datum:
       friendly_name: "Staubbehälter entleeren"
       icon_template: mdi:calendar-month      
       value_template: >-
-       {% set letzte_reinigung = states('sensor.roborock_vacuum_a10_last_clean_start') %}
+       {% set letzte_reinigung = states('sensor.roborock_s6_maxv_last_clean_start') %}
        {% set entleerung = states('input_number.staubsauger_entleeren') | int %}
        {% set entleerung = as_datetime(letzte_reinigung) + timedelta(days=entleerung) %}
        {{ entleerung.strftime('%d.%m.%Y') }}
 
-    ## [Staubsauger] Nächste Reinigung (Datum)
-    ## Gibt das Datum zurück, wann die nächste Reinigung ansteht
+    # Kategorie: Staubsauger
+    # Name: Nächste Reinigung (Datum)
+    # Beschreibung: Gibt das Datum zurück, wann die nächste Reinigung ansteht
+    # Letzte Anpassung: 20.05.2023
     staubsauger_naechste_geplante_reinigung:
       friendly_name: "Nächste geplante Reinigung"
       icon_template: mdi:calendar-month
       value_template: >-       
-        {% set letzte_reinigung = states('sensor.roborock_vacuum_a10_last_clean_start') %}
+        {% set letzte_reinigung = states('sensor.roborock_s6_maxv_last_clean_start') %}
         {% set zwangsreinigung = states('input_number.nach_tagen_reinigen') | int %}
         {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
         {{ zwangsreinigung.strftime('%d.%m.%Y') }}
+
+    # Kategorie: Staubsauger
+    # Name: Wieviel Reinigungen bis Entleerung
+    # Beschreibung: -
+    # Letzte Anpassung: 20.05.2023
+    staubsaugen_entleeren_verbleibend:
+      friendly_name: "Wieviel Reinigungen bis Entleerung"
+      value_template: >-
+        {% set rest = states('sensor.roborock_s6_maxv_total_clean_count') | int % states('input_number.staubsauger_entleeren') | int %}
+        {{ states('input_number.staubsauger_entleeren') | int - rest }}    
         

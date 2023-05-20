@@ -1,5 +1,7 @@
-## [Licht] TV Beleuchtung
-## Fasse die drei Lampen zu einer Gruppe zusammen
+# Kategorie: Licht
+# Name: TV Beleuchtung
+# Beschreibung: Fasse die drei Lampen zu einer Gruppe zusammen
+# Letzte Anpassung: 20.05.2023
 - platform: group
   name: TV Licht
   entities:

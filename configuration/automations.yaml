@@ -1,0 +1,1341 @@
+- id: '1654455377953'
+  alias: Flurlicht
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.flur_bewegung_erkannt
+    to: 'on'
+    from: 'off'
+    id: 'ON'
+  - platform: state
+    entity_id:
+    - binary_sensor.flur_keine_bewegung_erkannt
+    to: 'on'
+    id: 'OFF'
+    from: 'off'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.anwesend
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'ON'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: and
+            conditions:
+            - condition: state
+              entity_id: sensor.sonnenaufgang
+              state: Sonnenuntergang
+            - condition: numeric_state
+              entity_id: sun.sun
+              attribute: elevation
+              below: input_number.flur_licht_abends
+          sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.flur
+        - conditions:
+          - condition: and
+            conditions:
+            - condition: state
+              entity_id: sensor.sonnenaufgang
+              state: Sonnenaufgang
+            - condition: numeric_state
+              entity_id: sun.sun
+              attribute: elevation
+              below: input_number.flur_licht_fruh
+          sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.flur
+    - conditions:
+      - condition: device
+        type: is_on
+        device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+        entity_id: switch.shellyplus1_441793a3e76c_switch_0
+        domain: switch
+      - condition: trigger
+        id: 'OFF'
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.flur
+    default: []
+  mode: single
+- id: '1660433623646'
+  alias: 3D-Drucker
+  description: ''
+  trigger:
+  - platform: device
+    type: turned_on
+    device_id: 56661d1855347f947a777e4fb31309a0
+    entity_id: switch.tasmota_2
+    domain: switch
+  condition: []
+  action:
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: sensor.tasmota_energy_power_2
+      for:
+        hours: 0
+        minutes: 15
+        seconds: 0
+      below: 15
+  - if:
+    - condition: device
+      device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+      domain: media_player
+      entity_id: media_player.lg_b9
+      type: is_on
+    then:
+    - service: notify.fernseher
+      data:
+        message: Druck um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}}
+          abgeschlossen.
+  - service: notify.gotify
+    data:
+      title: 3D Drucker
+      message: Druck um {{as_timestamp(now()) | timestamp_custom('%H:%M Uhr')}} abgeschlossen.
+  - type: turn_off
+    device_id: 56661d1855347f947a777e4fb31309a0
+    entity_id: switch.tasmota_2
+    domain: switch
+    enabled: true
+  mode: single
+- id: '1661977068386'
+  alias: Küche
+  description: ''
+  trigger:
+  - platform: device
+    device_id: e63d7afbcf7e0943762c75cef2332a73
+    domain: shelly
+    type: single_push
+    subtype: button1
+    id: On/Off
+  - platform: device
+    device_id: e63d7afbcf7e0943762c75cef2332a73
+    domain: shelly
+    type: long_push
+    subtype: button1
+    id: Musik
+  - platform: device
+    device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+    domain: media_player
+    entity_id: media_player.lg_b9
+    type: turned_on
+    id: TV einschalten
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: On/Off
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: light.kuche_licht
+            state: 'off'
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: scene.wohnzimmer_hell
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: scene.wohnzimmer_fairfax
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              device_id: 57f5ff61c232c7b17260ce91834d2320
+          - service: scene.turn_on
+            target:
+              entity_id: '{{ states(''sensor.szenenauswahl'') }}'
+            metadata: {}
+        - conditions:
+          - condition: state
+            entity_id: light.kuche_licht
+            state: 'off'
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: scene.wohnzimmer_hell
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: scene.wohnzimmer_fairfax
+          sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              device_id: 57f5ff61c232c7b17260ce91834d2320
+        - conditions:
+          - condition: state
+            entity_id: light.kuche_licht
+            state: 'on'
+          sequence:
+          - service: light.turn_off
+            data:
+              transition: 2
+            target:
+              area_id:
+              - kuche
+              - wohnzimmer
+    - conditions:
+      - condition: trigger
+        id: Musik
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: media_player.wohnzimmer
+              state: playing
+          sequence:
+          - service: input_select.select_next
+            data:
+              cycle: true
+            target:
+              entity_id: input_select.playlisten
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.36
+            target:
+              entity_id:
+              - media_player.wohnzimmer
+              - media_player.allen_lautsprechern
+          - service: media_player.play_media
+            target:
+              entity_id: media_player.wohnzimmer
+            data:
+              media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+                states('input_select.playlisten') }}
+              media_content_type: spotify://playlist
+            enabled: true
+          - parallel:
+            - service: media_player.shuffle_set
+              data:
+                shuffle: true
+              target:
+                entity_id: media_player.spotify_erik
+            - service: media_player.media_next_track
+              data: {}
+              target:
+                entity_id: media_player.wohnzimmer
+            - choose:
+              - conditions:
+                - condition: device
+                  device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+                  domain: media_player
+                  entity_id: media_player.lg_b9
+                  type: is_on
+                - condition: state
+                  entity_id: media_player.lg_b9
+                  attribute: is_volume_muted
+                  state: false
+                sequence:
+                - service: media_player.volume_mute
+                  data:
+                    is_volume_muted: true
+                  target:
+                    device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+                - service: webostv.command
+                  data:
+                    entity_id: media_player.lg_b9
+                    command: com.webos.service.tvpower/power/turnOffScreen
+        - conditions:
+          - condition: state
+            entity_id: media_player.wohnzimmer
+            state: playing
+          sequence:
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.wohnzimmer
+          - if:
+            - condition: device
+              device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+              domain: media_player
+              entity_id: media_player.lg_b9
+              type: is_on
+            - condition: state
+              entity_id: media_player.lg_b9
+              attribute: is_volume_muted
+              state: true
+            then:
+            - service: media_player.volume_mute
+              data:
+                is_volume_muted: false
+              target:
+                device_id: 399153156e7b834e4e1f6b6ddb5bd1dd
+            - service: webostv.command
+              data:
+                entity_id: media_player.lg_b9
+                command: com.webos.service.tvpower/power/turnOnScreen
+    - conditions:
+      - condition: trigger
+        id: TV einschalten
+      - condition: state
+        entity_id: media_player.wohnzimmer
+        state: playing
+      sequence:
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: media_player.wohnzimmer
+  mode: single
+- id: '1671474285814'
+  alias: Monatliches Backup
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - schedule.diskstation
+    attribute: next_event
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition:
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: '{{ now().day == 1 }}'
+    - condition: template
+      value_template: '{{ now().day == 10 }}'
+    - condition: template
+      value_template: '{{ now().day == 20 }}'
+  action:
+  - service: hassio.addon_stdin
+    data:
+      addon: 15d21743_samba_backup
+      input:
+        command: trigger
+        backup_name: '{{now().strftime(''%Y-%m-%d'')}}-HomeAssistant-Backup'
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - sensor.samba_backup
+      from: RUNNING
+      to: SUCCEEDED
+  - service: notify.gotify
+    data:
+      title: Homeassistant
+      message: Backup am {{as_timestamp(now()) | timestamp_custom('%d.%m.%Y um %T
+        Uhr')}} durchgeführt.
+  mode: parallel
+  max: 2
+- id: '1672937116825'
+  alias: Szenenwechsel
+  description: Wenn der Sensor den Status ändert, wird dieser Wert in den Input-Helper
+    `input_select.szenenauswahl` geschrieben. Dies stellt die zentrale Automation
+    für die einheitliche Licht-Szenen-Steuerung für die Wohnung.
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.szenenauswahl
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  condition: []
+  action:
+  - service: input_select.select_option
+    data:
+      option: '{{ states(''sensor.szenenauswahl'') }}'
+    target:
+      entity_id: input_select.szenenauswahl
+  mode: single
+- id: '1675208635458'
+  alias: Alarm
+  description: 'Die Home-Assistant Automation "Alarm" ist eine komplexe Automatisierung,
+    die verschiedene Aktionen ausführt, um einen sanften Weckvorgang zu ermöglichen.
+    Sie basiert auf drei verschiedenen Trigger-Events: der Änderung der Alarmzeit,
+    dem Erreichen des Pre-Alarm-Zeitpunkts und dem Erfassen von Bewegungen im Haus.
+    Der Zweck dieser Automatisierung ist es, ein angenehmes und schrittweises Erwachen
+    zu ermöglichen, das den Schlaf nicht stört.
+
+
+    Die Automatisierung beginnt mit dem Trigger-Event "Alarm_Change", der ausgelöst
+    wird, wenn sich die Alarmzeit ändert. Dies wird durch die Überwachung des Sensors
+    "sensor.dn2103_next_alarm" erreicht. Sobald der Trigger ausgelöst wird, führt
+    die Automatisierung verschiedene Aktionen aus. Zunächst wird der "Pre-Alarm" Input-Helper
+    aktualisiert, der 10 Minuten vor dem eigentlichen Alarm klingeln soll. Dies wird
+    durch die Service-Call "input_datetime.set_datetime" realisiert. Der Pre-Alarm
+    wird so programmiert, dass er 10 Minuten vor dem Alarmton ertönt.
+
+
+    Als Nächstes wird der "after_alarm" Input-Helper aktualisiert, der 10 Minuten
+    nach dem Alarm klingeln soll. Dies wird durch die gleiche Service-Call "input_datetime.set_datetime"
+    realisiert. Die Service-Call "input_boolean.turn_on" aktiviert das Input-Helper
+    "alarm_switch", um das Abspielen von Musik im nächsten Schritt zu ermöglichen.
+
+
+    Anschließend erfolgt die Benachrichtigung über das Stellen des Alarms. Eine Sprachnachricht
+    wird über den Google Text-to-Speech-Service erstellt und an alle angeschlossenen
+    Lautsprecher im Haus gesendet, um die Alarmzeit bekannt zu geben. Die Sprachnachricht
+    wird von der Service-Call "tts.google_translate_say" ausgeführt.
+
+
+    Der zweite Trigger-Event "Pre-Alarm" wird ausgelöst, wenn die voreingestellte
+    Zeit für den Pre-Alarm erreicht ist. Dieser Trigger-Event wird nur ausgelöst,
+    wenn der "alarm_switch" aktiviert ist. Sobald der Trigger-Event ausgelöst wird,
+    wird die Lautstärke aller angeschlossenen Lautsprecher auf 0 gestellt, gefolgt
+    von einer Verzögerung von 7 Sekunden. Dann wird die Musik abgespielt. Diese Musik
+    wird über die Service-Call "media_player.play_media" auf den angeschlossenen Lautsprechern
+    abgespielt. Die Playlist "Sleepy Piano" auf Spotify wird abgespielt, um ein sanftes
+    Aufwachen zu ermöglichen. Nach 7 Sekunden erfolgt die Skriptausführung "fade_volume",
+    die die Lautstärke in einer Minute auf 50% erhöht. Eine weitere Verzögerung von
+    1 Minute und 5 Sekunden wird hinzugefügt, bevor die Lautstärke auf 45% gesetzt
+    wird.
+
+
+    Der dritte Trigger-Event "Alarm_aus" wird ausgelöst, wenn Bewegungen im Flur erkannt
+    werden. Sobald der Trigger ausgelöst wird, werden alle angeschlossenen Lautsprecher
+    ausgeschaltet und die Musik wird gestoppt. Die Service-Call "media_player.turn_off"
+    schaltet alle angeschlossenen Lautsprecher aus, und die Service-Call "media_player.media_stop"
+    stoppt'
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.dn2103_next_alarm
+    id: Alarm_Change
+    attribute: Local Time
+  - platform: time
+    at: input_datetime.pre_alarm
+    id: Pre-Alarm
+  - platform: state
+    entity_id:
+    - binary_sensor.flur_bewegung_erkannt
+    from: 'off'
+    to: 'on'
+    id: Alarm_aus
+  condition:
+  - condition: not
+    conditions:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: sensor.dn2103_next_alarm
+        state: unavailable
+      - condition: state
+        entity_id: sensor.dn2103_next_alarm
+        state: unknown
+  - condition: state
+    entity_id: binary_sensor.anwesend
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Alarm_Change
+      sequence:
+      - service: input_datetime.set_datetime
+        data:
+          datetime: '{{ (as_timestamp(states(''sensor.dn2103_next_alarm'')) - 300)
+            | as_datetime | as_local }}'
+        target:
+          entity_id: input_datetime.pre_alarm
+      - service: input_datetime.set_datetime
+        data:
+          datetime: '{{ (as_timestamp(states(''sensor.dn2103_next_alarm'')) + 600)
+            | as_datetime | as_local }}'
+        target:
+          entity_id: input_datetime.after_alarm
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.alarm_switch
+      - service: tts.google_translate_say
+        data:
+          cache: true
+          message: Der Wecker wurde auf {% set t = strptime(state_attr('sensor.dn2103_next_alarm',
+            'Local Time'), '%a %b %d %H:%M:%S %Z%z %Y') %} {{ t.hour }}:{{ t.minute
+            }} Uhr gestellt. Gute Nacht.
+          language: de
+          entity_id: media_player.allen_lautsprechern
+    - conditions:
+      - condition: trigger
+        id: Pre-Alarm
+      - condition: state
+        entity_id: input_boolean.alarm_switch
+        state: 'on'
+      sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0
+        enabled: true
+        target:
+          entity_id: media_player.allen_lautsprechern
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 7
+          milliseconds: 0
+      - service: media_player.play_media
+        target:
+          entity_id: media_player.allen_lautsprechern
+        data:
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:37i9dQZF1DX03b46zi3S82
+          media_content_type: spotify://playlist
+        metadata:
+          title: Sleepy Piano
+          thumbnail: https://i.scdn.co/image/ab67706f00000003df3ed0d891ac979568452312
+          media_class: playlist
+          children_media_class: track
+          navigateIds:
+          - {}
+          - media_content_type: spotify://library
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+          - media_content_type: spotify://categories
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/categories
+          - media_content_type: spotify://category_playlists
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/0JQ5DAqbMKFCuoRTxhYWow
+          - media_content_type: spotify://playlist
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:37i9dQZF1DX03b46zi3S82
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 7
+          milliseconds: 0
+      - service: script.fade_volume
+        data:
+          curve: linear
+          target_player: media_player.allen_lautsprechern
+          duration: 60
+          target_volume: 0.4
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 5
+          milliseconds: 0
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.4
+        enabled: true
+        target:
+          entity_id: media_player.allen_lautsprechern
+      - service: media_player.play_media
+        target:
+          entity_id: media_player.allen_lautsprechern
+        data:
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+          media_content_type: spotify://show
+        metadata:
+          title: Tagesschau in 100 Sekunden
+          thumbnail: https://i.scdn.co/image/4fc388d42bb11104bc06f5503f6c20d743be0a8a
+          media_class: podcast
+          children_media_class: episode
+          navigateIds:
+          - {}
+          - media_content_type: spotify://library
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+          - media_content_type: spotify://current_user_saved_shows
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/current_user_saved_shows
+          - media_content_type: spotify://show
+            media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+      - wait_for_trigger:
+        - platform: device
+          device_id: d4ca3c37c7262ab00aebe569650ad102
+          domain: media_player
+          entity_id: media_player.wohnzimmer
+          type: paused
+      - service: media_player.play_media
+        target:
+          entity_id: media_player.allen_lautsprechern
+        data:
+          media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:4r2twUYtviwpCpFnrfkkgM
+          media_content_type: spotify://playlist
+        enabled: true
+      - service: media_player.volume_set
+        data:
+          volume_level: 45
+        enabled: true
+        target:
+          entity_id: media_player.allen_lautsprechern
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - if:
+        - condition: or
+          conditions:
+          - condition: device
+            device_id: 44ec07205b7efd3b49e48d086b2d77a3
+            domain: media_player
+            entity_id: media_player.schlafzimmer
+            type: is_playing
+          - condition: device
+            device_id: d4ca3c37c7262ab00aebe569650ad102
+            domain: media_player
+            entity_id: media_player.wohnzimmer
+            type: is_playing
+        then:
+        - service: media_player.media_stop
+          data: {}
+          target:
+            entity_id: media_player.allen_lautsprechern
+        - service: input_boolean.turn_off
+          data: {}
+          target:
+            entity_id: input_boolean.alarm_switch
+    - conditions:
+      - condition: trigger
+        id: Alarm_aus
+      - condition: time
+        after: input_datetime.pre_alarm
+        before: input_datetime.after_alarm
+      sequence:
+      - service: media_player.media_stop
+        data: {}
+        target:
+          entity_id:
+          - media_player.allen_lautsprechern
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.alarm_switch
+  mode: single
+- id: '1675560030142'
+  alias: Auto-Update
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - update.home_assistant_core_update
+    attribute: latest_version
+    id: Core
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.home_assistant_operating_system_update
+    attribute: latest_version
+    id: ' Operating System Update'
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.home_assistant_supervisor_update
+    attribute: latest_version
+    id: Supervisor
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.file_editor_update
+    attribute: latest_version
+    id: File
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.terminal_ssh_update
+    attribute: latest_version
+    id: SSH
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.samba_backup_update
+    attribute: latest_version
+    id: SAMBA
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.samba_backup_update
+    attribute: latest_version
+    id: Samba-Backup
+    enabled: false
+  - platform: template
+    value_template: "{% set repositories = state_attr('sensor.hacs', 'repositories')
+      %}\n{% if repositories %}\n  true\n{% else %}\n  false\n{% endif %}"
+    id: HACS
+    enabled: false
+  - platform: state
+    entity_id:
+    - update.home_assistant_core_update
+    - update.home_assistant_operating_system_update
+    - update.home_assistant_supervisor_update
+  condition: []
+  action:
+  - wait_for_trigger:
+    - platform: time
+      at: 03:00:00
+    continue_on_timeout: false
+    enabled: false
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Core
+      sequence:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.home_assistant_core_update
+    - conditions:
+      - condition: trigger
+        id: ' Operating System Update'
+      sequence:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.home_assistant_operating_system_update
+    - conditions:
+      - condition: trigger
+        id: Supervisor
+      sequence:
+      - service: update.install
+        data: {}
+        target:
+          entity_id: update.home_assistant_supervisor_update
+    - conditions:
+      - condition: trigger
+        id: File
+      sequence:
+      - service: hassio.addon_update
+        data:
+          addon: core_configurator
+    - conditions:
+      - condition: trigger
+        id: SSH
+      sequence:
+      - service: hassio.addon_update
+        data:
+          addon: core_ssh
+    - conditions:
+      - condition: trigger
+        id: SAMBA
+      sequence:
+      - service: hassio.addon_update
+        data:
+          addon: 15d21743_samba_backup
+    - conditions:
+      - condition: trigger
+        id: Samba-Backup
+      sequence:
+      - service: hassio.addon_update
+        data:
+          addon: 15d21743_samba_backup
+    enabled: false
+  - if:
+    - condition: template
+      value_template: '{{trigger.id == "HACS" }}'
+    then:
+    - service: notify.gotify
+      data:
+        title: Homeassistent - {{trigger.id}}
+        message: HACS Update verfügbar  {% set repositories = state_attr('sensor.hacs',
+          'repositories') %} {% for repository in repositories %} {{ repository['display_name']
+          }} ({{ repository['installed_version'] }} / {{ repository['available_version']
+          }}) {% endfor %}
+    else:
+    - service: notify.gotify
+      data:
+        message: Update wurde ausgeführt
+        title: Homeassistent - {{trigger.id}}
+    enabled: false
+  - service: update.install
+    target:
+      entity_id: '{{ trigger.to_state.entity_id }}'
+    enabled: false
+  - service: update.install
+    data: {}
+    target:
+      entity_id: '{{ states.update | selectattr(''state'',''eq'',''on'') | map(attribute=''entity_id'')
+        | list }}
+
+        '
+  mode: parallel
+  max: 10
+- id: '1672901148359'
+  alias: TV Beleuchtung
+  description: "TV einschalten: wird eingeschaltet und die passende Szene(anhand von
+    einem Sensor) wird eingestellt. Der Übergang wird mithilfe eines Helfers eingestellt.
+    \n\nTV ausschalten: wird ausgeschaltet. Der Übergang wird mithilfe eines Helfers
+    eingestellt.\n\nSzenenwechsel: Wenn der TV eingeschaltet ist, wird bei einem Statuswechsels
+    des Sensors (anhand des Sonnenstandes), die passende Szene ausgewählt und aktiviert
+    bzw. die Beleuchtung ein- oder ausgeschaltet."
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.fernseher
+    from: 'off'
+    to: 'on'
+    id: Einschalten
+  - platform: state
+    entity_id:
+    - media_player.lg_b9
+    from: 'off'
+    id: Einschalten_Backup
+  - platform: state
+    entity_id:
+    - binary_sensor.fernseher
+    id: Ausschalten
+    to: 'off'
+  - platform: state
+    entity_id:
+    - media_player.lg_b9
+    to: 'off'
+    id: Ausschalten_Backup
+  - platform: state
+    entity_id:
+    - sensor.szenenauswahl
+    id: Szenenwechsel
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.tv_licht
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Einschalten
+        - condition: trigger
+          id: Einschalten_Backup
+      sequence:
+      - choose:
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: 'False'
+          sequence:
+          - service: scene.turn_on
+            data_template:
+              entity_id: '{{ states(''input_select.szenenauswahl'') }}
+
+                '
+              transition: '{{ states(''input_number.tv_einschalten_transition'') }}
+
+                '
+    - conditions:
+      - condition: state
+        entity_id: light.tv_licht
+        state: 'on'
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Ausschalten
+        - condition: trigger
+          id: Ausschalten_Backup
+      sequence:
+      - service: light.turn_off
+        data_template:
+          entity_id: light.tv_licht
+          transition: '{{ states(''input_number.tv_ausschalten_transition'') }}
+
+            '
+    - conditions:
+      - condition: trigger
+        id: Szenenwechsel
+      - condition: state
+        entity_id: binary_sensor.fernseher
+        state: 'on'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: sensor.szenenauswahl
+            state: 'False'
+          sequence:
+          - service: light.turn_off
+            data_template:
+              entity_id: light.tv_licht
+              transition: '{{ states(''input_number.tv_ausschalten_transition'') }}
+
+                '
+        - conditions:
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: sensor.szenenauswahl
+              state: 'False'
+          sequence:
+          - service: scene.turn_on
+            data_template:
+              entity_id: '{{ states(''input_select.szenenauswahl'') }}
+
+                '
+              transition: '{{ states(''input_number.tv_umschalten_transition'') }}
+
+                '
+  mode: single
+- id: '1681321943536'
+  alias: Staubsaugen
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.anwesend
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    id: Abwesenheit
+    from: 'on'
+    to: 'off'
+  - platform: time
+    at: input_datetime.staubsaugen_beginn
+    id: Staubsaugen beginnen
+  - platform: device
+    device_id: e63d7afbcf7e0943762c75cef2332a73
+    domain: shelly
+    type: double_push
+    subtype: button1
+    id: Küche staubsaugen
+  - platform: state
+    entity_id:
+    - binary_sensor.staubsauger_alle_sensoren
+    from: 'off'
+    to: 'on'
+    id: Sensoren Reinigen
+  - platform: time
+    at: 00:00:01
+    id: Sensor zurücksetzen
+  - platform: state
+    entity_id:
+    - binary_sensor.staubsauger_behaelter_entleeren
+    from: 'off'
+    to: 'on'
+    id: Behälter entleeren
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Sensor zurücksetzen
+      - condition: state
+        entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Abwesenheit
+        - condition: trigger
+          id: Staubsaugen beginnen
+      - condition: state
+        entity_id: binary_sensor.staubsauger_heute_reinigung_notwendig
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.staubsauger_heute_gestaubsaugt
+        state: 'off'
+        enabled: true
+      - condition: state
+        entity_id: vacuum.roborock_s6_maxv
+        state: docked
+      - condition: time
+        after: input_datetime.staubsaugen_beginn
+        before: input_datetime.staubsaugen_ende
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.anwesend
+            state: 'off'
+          sequence:
+          - service: script.staubsaugen
+            data:
+              zustand: Abwesenheit
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.staubsauger_zwangsreinigung
+            state: 'on'
+          sequence:
+          - service: script.staubsaugen
+            data:
+              zustand: Zwangsreinigung
+    - conditions:
+      - condition: trigger
+        id: Küche staubsaugen
+      sequence:
+      - service: script.staubsaugen
+        data:
+          zustand: Zonenreinigung
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: Sensoren Reinigen
+        - condition: trigger
+          id: Behälter entleeren
+      sequence:
+      - if:
+        - condition: state
+          entity_id: binary_sensor.anwesend
+          state: 'off'
+        then:
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - binary_sensor.anwesend
+            from: 'off'
+            to: 'on'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 0
+          timeout:
+            hours: 48
+            minutes: 0
+            seconds: 0
+            milliseconds: 0
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.staubsauger_hauptbuerste
+            state: 'on'
+          sequence:
+          - service: notify.gotify
+            data:
+              message: Hauptbürste bitte reinigen!
+              title: Roborock S6 MaxV
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.staubsauger_hauptbuerste
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.staubsauger_seitenbuerste
+            state: 'on'
+          sequence:
+          - service: notify.gotify
+            data:
+              message: Seitenbürste bitte reinigen!
+              title: Roborock S6 MaxV
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.staubsauger_seitenbuerste
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.staubsauger_filter
+            state: 'on'
+          sequence:
+          - service: notify.gotify
+            data:
+              message: Filter bitte reinigen!
+              title: Roborock S6 MaxV
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.staubsauger_seitenbuerste
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.staubsauger_kamerasensoren
+            state: 'on'
+          sequence:
+          - service: notify.gotify
+            data:
+              message: Seitenbürste bitte reinigen!
+              title: Roborock S6 MaxV
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.staubsauger_seitenbuerste
+        - conditions:
+          - condition: trigger
+            id: Behälter entleeren
+          sequence:
+          - service: notify.gotify
+            data:
+              title: Roborock S6 MaxV
+              message: Staubbehälter bitte entleeren!
+  mode: parallel
+  max: 10
+- id: '1682536996834'
+  alias: Alarm (neu)
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.wecker
+    id: AN
+  condition:
+  - condition: state
+    entity_id: input_boolean.alarm_switch
+    state: 'on'
+  action:
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.wecker
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.001
+    target:
+      entity_id:
+      - media_player.allen_lautsprechern
+    enabled: true
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.allen_lautsprechern
+    data:
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+        states('input_select.playlisten') }}
+      media_content_type: spotify://playlist
+    enabled: true
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: input_select.select_next
+    data:
+      cycle: true
+    target:
+      entity_id: input_select.playlisten
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - parallel:
+    - service: media_player.shuffle_set
+      data:
+        shuffle: true
+      target:
+        entity_id: media_player.spotify_erik
+    - service: media_player.media_next_track
+      data: {}
+      target:
+        entity_id: media_player.wohnzimmer
+    enabled: true
+  - repeat:
+      until:
+      - condition: device
+        type: is_on
+        device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+        entity_id: light.shelly_flur
+        domain: light
+      sequence:
+      - if:
+        - condition: numeric_state
+          entity_id: media_player.allen_lautsprechern
+          attribute: volume_level
+          below: 0.44
+        then:
+        - service: media_player.volume_set
+          data:
+            volume_level: '{% set volume = state_attr(''media_player.allen_lautsprechern'',''volume_level'')
+              %} {{ volume + 0.01 }}'
+          target:
+            entity_id: media_player.allen_lautsprechern
+        else:
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - binary_sensor.flur_bewegung_erkannt
+            to: 'on'
+            from: 'off'
+    enabled: false
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.flur_bewegung_erkannt
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.4
+    target:
+      entity_id:
+      - media_player.wohnzimmer
+      - media_player.schlafzimmer
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.allen_lautsprechern
+    data:
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+      media_content_type: spotify://show
+    metadata:
+      title: Tagesschau in 100 Sekunden
+      thumbnail: https://i.scdn.co/image/4fc388d42bb11104bc06f5503f6c20d743be0a8a
+      media_class: podcast
+      children_media_class: episode
+      navigateIds:
+      - {}
+      - media_content_type: spotify://library
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164
+      - media_content_type: spotify://current_user_saved_shows
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/current_user_saved_shows
+      - media_content_type: spotify://show
+        media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:show:4QwUbrMJZ27DpjuYmN4Tun
+  - wait_for_trigger:
+    - platform: device
+      device_id: 17076fc81df5839017466ac26be281b5
+      domain: media_player
+      entity_id: media_player.allen_lautsprechern
+      type: paused
+    continue_on_timeout: true
+    timeout:
+      hours: 0
+      minutes: 3
+      seconds: 0
+      milliseconds: 0
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - timer.wecker
+      from: active
+      to: idle
+    - platform: device
+      device_id: c92919e4da0f3e84110f0e1bc2dfa3d2
+      domain: shelly
+      type: single_push
+      subtype: button1
+    timeout:
+      hours: 0
+      minutes: 40
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.allen_lautsprechern
+    data:
+      media_content_id: spotify://67abeeecded744aec5181c0e9c3af164/spotify:playlist:{{
+        states('input_select.playlisten') }}
+      media_content_type: spotify://playlist
+    enabled: true
+  - service: tts.google_translate_say
+    data:
+      cache: false
+      entity_id: media_player.allen_lautsprechern
+      message: 'ACHTUNG! Es ist {{ now().strftime(''%H:%M'') }} Uhr. Das aktuelle
+        Wetter in Berlin ist {{ states(''weather.home'') | replace("partlycloudy",
+        "teilweise bewölkt") | replace("cloudy", "bewölkt") | replace("sunny", "sonnig")
+        | replace("rainy", "regnerisch") }} mit einer Temperatur von  {{ state_attr(''weather.home'',
+        ''temperature'') }} Grad Celsius. Der Höchstwert für heute beträgt {{ state_attr(''weather.home'',
+        ''forecast'')[0][''temperature''] }} Grad Celsius, der Tiefstwert für heute
+        beträgt {{ state_attr(''weather.home'', ''forecast'')[0][''templow''] }} Grad
+        Celsius und die Vorhersage für heute ist: {{ state_attr(''weather.home'',
+        ''forecast'')[0][''condition''] | replace("partlycloudy", "teilweise bewölkt.")
+        | replace("cloudy", "bewölkt.") | replace("sunny", "sonnig.") | replace("rainy",
+        "regnerisch.") }} Morgenroutine wird beendet.'
+      language: de
+  - wait_for_trigger:
+    - platform: device
+      device_id: 17076fc81df5839017466ac26be281b5
+      domain: media_player
+      entity_id: media_player.allen_lautsprechern
+      type: paused
+    continue_on_timeout: true
+    timeout:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+    enabled: true
+  - service: media_player.turn_off
+    data: {}
+    target:
+      entity_id: media_player.allen_lautsprechern
+  mode: restart
+- id: '1684608033573'
+  alias: Diskstation
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - schedule.diskstation
+    attribute: next_event
+    id: Zeitplan
+  - platform: time
+    at: 01:30:00
+    id: Shutdown
+  condition: []
+  action:
+  - if:
+    - condition: state
+      entity_id: binary_sensor.diskstation_ping
+      state: 'off'
+    then:
+    - service: wake_on_lan.send_magic_packet
+      data:
+        broadcast_port: 9
+        mac: 00-11-32-37-46-98
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - binary_sensor.diskstation_ping
+        to: 'on'
+      continue_on_timeout: true
+      timeout:
+        hours: 0
+        minutes: 5
+        seconds: 0
+        milliseconds: 0
+    else:
+    - service: button.press
+      data: {}
+      target:
+        entity_id: button.diskstation_shutdown
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Zeitplan
+      sequence:
+      - if:
+        - condition: state
+          entity_id: binary_sensor.diskstation_ping
+          state: 'off'
+        then:
+        - service: wake_on_lan.send_magic_packet
+          data:
+            broadcast_port: 9
+            mac: 00-11-32-37-46-98
+        - wait_for_trigger:
+          - platform: state
+            entity_id:
+            - binary_sensor.diskstation_ping
+            to: 'on'
+          continue_on_timeout: true
+          timeout:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+        else:
+        - service: button.press
+          data: {}
+          target:
+            entity_id: button.diskstation_shutdown
+    - conditions:
+      - condition: trigger
+        id: Shutdown
+      - condition: state
+        entity_id: binary_sensor.diskstation_ping
+        state: 'on'
+      sequence:
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.diskstation_shutdown
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.diskstation_ping
+          from: 'on'
+          to: 'off'
+  mode: single

@@ -1,5 +1,7 @@
-## [Benachrichtigung] Gotify
-## Verbindung zum Self-Hosted Notification Dienst (Docker-Container)
+# Kategorie: Benachrichtigung
+# Name: Gotify
+# Beschreibung: Verbindung zum Self-Hosted Notification Dienst (Docker-Container)
+# Letzte Anpassung: 20.05.2023
 - name: gotify
   platform: rest
   resource: !secret gotify_url

@@ -11,3 +11,6 @@ sensor:
       
   - name: "docker-1-cpu_load"      
     state_topic: "home/nodes/sensor/pi-docker-1/cpu_load"
+    
+  - name: "lastsambabackup"
+    state_topic: "sensor/lastsambabackup"

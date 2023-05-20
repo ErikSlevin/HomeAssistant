@@ -1,51 +1,16 @@
 ## [Datenbank] Mariadb
 ## Verbindung zu einer Self-Hosted Datenbank (Docker-Container)
-db_url: !secret db_connection
-commit_interval: 60
-purge_keep_days: 730
-auto_purge: false
-auto_repack: false
-include:
-  entities:
-    # Wohnzimmer
-    - sensor.wandthermostat_temperature
-    - sensor.wandthermostat_humidity
-    - sensor.wohnzimmer_soll_temperatur
-    - sensor.wohnzimmer_heizungen
-    
-    # Buro
-    - sensor.buero_temperature
-    - sensor.buero_heating
-    - sensor.buero_soll_temperatur
-    
-    # Außen
-    - sensor.aussen_temperatur
-    - sensor.aussen_humidity
-    
-    # Stromkosten
-    - sensor.tasmota_energy_total
-    - sensor.tasmota_energy_total_cost
-    - sensor.tasmota_energy_total_2
-    - sensor.tasmota_energy_total_2_cost
-    - sensor.tasmota_energy_power_2
-    - sensor.kuche_licht_energy_total
-    - sensor.3d_drucker
-    
-    # Szenenwechsel
-    - sensor.szenenauswahl
-    
-    # Sonnenstand
-    - sensor.sonnenstand
-    
-    # Input-Value
-    - input_number.tv_licht_aus_zu_hell_abend
-    - input_number.tv_licht_hell_zu_farbig_abend
-    - input_number.tv_licht_farbig_zu_hell_frueh
-    - input_number.tv_licht_hell_zu_aus_frueh
-    
-  domains:
-    - person
-    - climate
-    - input_datetime
-    - input_number
-    - input_select
+# db_url: !secret db_connection
+# commit_interval: 60
+# purge_keep_days: 730
+# auto_purge: false
+# auto_repack: false
+# include:
+#   domains:
+#     - sensor
+#     - switch
+#     - light
+#     - automation
+#     - updater
+#     - input
+

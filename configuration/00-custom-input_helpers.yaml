@@ -1,131 +1,186 @@
- # --------- I N P U T   N U M B E R --------- #
+###############################################
+###              INPUT_NUMBER               ###
+###############################################
 input_number:
 
-  ## [Input_Number] Staubsauger entleeren
-  ## Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
+  # Kategorie: Input_Number
+  # Name: Staubsauger entleeren
+  # Beschreibung: Nach wie vielen Reinigungen soll der Staubbehälter geleert werden.
+  # Letzte Anpassung: 20.05.2023
   staubsauger_entleeren:
     name: "Staubsauger entleeren"
     unit_of_measurement: "mal"
     icon: mdi:trash-can
-    min: 1
-    max: 20
+    min: 4
+    max: 16
+    initial: 7
     step: 1
-
-  ## [Input_Number] Staubsauger entleeren
-  ## Nach wievielen Reinigungen soll der Staubbehälter geleert werden.
+    mode: box
+ 
+  # Kategorie: Input_Number
+  # Name: Zwangsreinigung
+  # Beschreibung: Nach wie vielen Tagen soll eine "Zwangsreinigung" durchgeführt werden.
+  # Letzte Anpassung: 20.05.2023
   nach_tagen_reinigen:
     name: "Nach Tagen reinigen"
     unit_of_measurement: "Tage"
     icon: mdi:calendar-expand-horizontal-outline
     min: 1
     max: 7
+    initial: 2
     step: 1
+    mode: box
 
-  ## [Input_Number] TV-Licht Einschalten Transition
-  ## Länge der Transition beim Einschalten in Sekunden, bis 100% erreicht wurde.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Einschalten Transition
+  # Beschreibung: Länge der Transition beim Einschalten in Sekunden, bis 100% erreicht wurde.
+  # Letzte Anpassung: 20.05.2023
   tv_einschalten_transition:
     name: "TV-Licht: [ON] Übergang"
     unit_of_measurement: "sek"
     icon: mdi:transition
     min: 0
     max: 30
+    initial: 10
     step: 0.2
+    mode: box
 
-  ## [Input_Number] TV-Licht Auschalten Transition
-  ## Länge der Transition beim Ausschalten in Sekunden, bis 0% erreicht wurde.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Ausschalten Transition
+  # Beschreibung: Länge der Transition beim Ausschalten in Sekunden, bis 0% erreicht wurde.
+  # Letzte Anpassung: 20.05.2023
   tv_ausschalten_transition:
     name: "TV-Licht: [OFF] Übergang"
     unit_of_measurement: "sek"
     icon: mdi:transition
     min: 0
     max: 30
+    initial: 10
     step: 0.2
+    mode: box
 
-  ## [Input_Number] TV-Licht Change Transition
-  ## Länge der Transition bei einem Szenen-Wechsel in Sekunden.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Change Transition
+  # Beschreibung: Länge der Transition bei einem Szenen-Wechsel in Sekunden.
+  # Letzte Anpassung: 20.05.2023
   tv_umschalten_transition:
     name: "TV-Licht: [CHANGE] Übergang"
     unit_of_measurement: "sek"
     icon: mdi:transition
     min: 0
     max: 300
+    initial: 100
     step: 10
+    mode: box
 
-  ## [Input_Number] TV-Licht Aus zu Hell (Abend)
-  ## Bei welchem Sonnenstand soll das TV-Licht Abends in die Szene Hell versetzt werden.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Aus zu Hell (Abend)
+  # Beschreibung: Bei welchem Sonnenstand soll das TV-Licht abends in die Szene "Hell" versetzt werden.
+  # Letzte Anpassung: 20.05.2023
   tv_licht_aus_zu_hell_abend:
     name: "TV-Licht: Aus zu Hell (Abend)"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-down
     min: -10
     max: 10
+    initial: 4.8
     step: 0.2
+    mode: box
 
-  ## [Input_Number] TV-Licht Hell zu Farbig (Abend)
-  ## Bei welchem Sonnenstand soll das TV-Licht Abends in die farbige Szene versetzt werden.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Hell zu Farbig (Abend)
+  # Beschreibung: Bei welchem Sonnenstand soll das TV-Licht abends in die farbige Szene versetzt werden.
+  # Letzte Anpassung: 20.05.2023
   tv_licht_hell_zu_farbig_abend:
     name: "TV-Licht: Hell zu Farbig (Abend)"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-down
     min: -10
     max: 10
+    initial: 0.4
     step: 0.2
+    mode: box
     
-  ## [Input_Number] TV-Licht Farbig zu Hell (Früh)
-  ## Bei welchem Sonnenstand soll das TV-Licht Früh in die Szene Hell versetzt werden.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Farbig zu Hell (Früh)
+  # Beschreibung: Bei welchem Sonnenstand soll das TV-Licht früh in die Szene "Hell" versetzt werden.
+  # Letzte Anpassung: 20.05.2023
   tv_licht_farbig_zu_hell_frueh:
     name: "TV-Licht: Farbig zu Hell (Früh)"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-up
     min: -10
     max: 10
+    initial: -5.4
     step: 0.2
+    mode: box
     
-  ## [Input_Number] TV-Licht Hell zu Aus (Früh)
-  ## Bei welchem Sonnenstand soll das TV-Licht Früh ausgeschaltet werden.
+  # Kategorie: Input_Number
+  # Name: TV-Licht Hell zu Aus (Früh)
+  # Beschreibung: Bei welchem Sonnenstand soll das TV-Licht früh ausgeschaltet werden.
+  # Letzte Anpassung: 20.05.2023
   tv_licht_hell_zu_aus_frueh:
     name: "TV-Licht: Hell zu aus (Früh)"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-up
     min: -10
     max: 10
+    initial: -1.6
     step: 0.2
+    mode: box
     
-  ## [Input_Number] Flur Licht Abends
-  ## Bei welchem Sonnenstand soll das Flur-Licht eingeschaltet werden.
+  # Kategorie: Input_Number
+  # Name: Flur Licht Abends
+  # Beschreibung: Bei welchem Sonnenstand soll das Flur-Licht eingeschaltet werden.
+  # Letzte Anpassung: 20.05.2023
   flur_licht_abends:
     name: "Flur Licht Abends"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-down
     min: -8
     max: 8
+    initial: 4
     step: 0.2
+    mode: box
     
-  ## [Input_Number] Flur Licht Früh
-  ## Bei welchem Sonnenstand soll das Flur-Licht ausgeschaltet werden.
+  # Kategorie: Input_Number
+  # Name: Flur Licht Früh
+  # Beschreibung: Bei welchem Sonnenstand soll das Flur-Licht ausgeschaltet werden.
+  # Letzte Anpassung: 20.05.2023
   flur_licht_fruh:
     name: "Flur Licht Früh"
     unit_of_measurement: "Grad"
     icon: mdi:weather-sunset-up
     min: -8
     max: 8
+    initial: -4.4
     step: 0.2
+    mode: box
     
-  ## [Input_Number] Wohnungs Temperatur
-  ## Welche Temperatur muss unterschritten werden, damit bei Abwesenheit geheizt wird
+  # Kategorie: Input_Number
+  # Name: Wohnungs Temperatur
+  # Beschreibung: Welche Temperatur muss unterschritten werden, damit bei Abwesenheit geheizt wird
+  # Letzte Anpassung: 20.05.2023
   wohungs_temperatur:
     name: "Wohnungs Temperatur"
     unit_of_measurement: "Grad"
     icon: mdi:coolant-temperature
     min: 10
     max: 16
+    initial: 14
     step: 0.5
+    mode: box
 
-# --------- I N P U T   S E L E C T --------- #
+###############################################
+###               INPUT_SELECT              ###
+###############################################
+
 input_select:
 
-  ## [Input_Select] Szenenauswahl
-  ## Einheitliche Szenenauswahl für alle Phillips Hue Lampen
+  # Kategorie: Input_Select
+  # Name: Szenenauswahl
+  # Beschreibung: Einheitliche Szenenauswahl für alle Philips Hue Lampen
+  # Letzte Anpassung: 20.05.2023
   szenenauswahl:
     name: "Szenen Auswahl"
     icon: mdi:form-select
@@ -133,46 +188,141 @@ input_select:
       - scene.wohnzimmer_fairfax
       - scene.wohnzimmer_hell
 
-# --------- I N P U T   D A T E T I M E --------- #
+  # Kategorie: Input_Select
+  # Name: Spotify Playlisten
+  # Beschreibung: Einheitliche Szenenauswahl für alle Philips Hue Lampen
+  # Letzte Anpassung: 20.05.2023
+  playlisten:
+    name: "Spotify Playlisten"
+    icon: mdi:playlist-play
+    options:
+      - "37i9dQZF1DX0r3x8OtiwEM"        # Lowkey tech
+      - "37i9dQZF1DX05r4Oy3Ln97"        # Summer House 2023
+      - "37i9dQZF1DXbX3zSzB4MO0"        # Club Beats
+      - "37i9dQZF1DX8AliSIsGeKd"        # Electronic Rising
+      - "37i9dQZF1DX7ZUug1ANKRP"        # Main Stage
+      - "37i9dQZF1DX0AZ24QB6TCx"        # Afterhours
+      - "37i9dQZF1DWTvNyxOwkztu"        # Chillout Lounge
+      - "37i9dQZF1DWVgfADJapICT"        # Kopfkino
+      - "37i9dQZF1DX5xiztvBdlUf"        # Deep House Blend
+      
+###############################################
+###               INPUT_DATETIME            ###
+###############################################
+
 input_datetime:
 
-  ## [Input_Datetime] Staubsaugen Beginn
-  ## zu welcher Uhrzeit soll gereinigt werden.
+  # Kategorie: Input_Datetime
+  # Name: Staubsaugen Beginn
+  # Beschreibung: Zu welcher Uhrzeit soll gereinigt werden.
+  # Letzte Anpassung: 20.05.2023
   staubsaugen_beginn:
     name: "Staubsaugen Beginn"
     icon: mdi:robot-vacuum
     has_date: false
     has_time: true
+    initial: "08:00"
 
-  ## [Input_Datetime] Staubsaugen Ende
-  ## Bis zu welcher Uhrzeit darf gereinigt werden.
+  # Kategorie: Input_Datetime
+  # Name: Staubsaugen Ende
+  # Beschreibung: Bis zu welcher Uhrzeit darf gereinigt werden.
+  # Letzte Anpassung: 20.05.2023
   staubsaugen_ende:
     name: "Staubsaugen Ende"
     icon: mdi:robot-vacuum
     has_date: false
     has_time: true
+    initial: "20:30"
 
-  ## [Input_Datetime] Alarm-Time
-  ## Wann soll der Schlafzimmer Alarm ausgelöst werden
-  alarm_time:
-    name: "Alarm Zeit"
-    icon: mdi:alarm
-    has_date: false
-    has_time: true
-
-  ## [Input_Datetime] Pre-Alarm-Time
-  ## Wann soll die leise Musik vor dem eigentlichen Alarm eingeschaltet werden (bsp.: 10 min vor Alarm)
+  # Kategorie: Input_Datetime
+  # Name: Pre-Alarm-Time
+  # Beschreibung: Wann soll die leise Musik vor dem eigentlichen Alarm eingeschaltet werden
+  # Letzte Anpassung: 20.05.2023
   pre_alarm:
     name: "Pre Alarm Zeit"
     icon: mdi:alarm
-    has_date: false
+    has_date: true
     has_time: true
 
-# ------------- I N P U T  B O O L R A N ------------#
+  # Kategorie: Input_Datetime
+  # Name: After-Alarm-Time
+  # Beschreibung: In welchem Zeitraum (Pre-After_Alarm) soll der Bewegungsmelder zum Deaktivieren verwendet werden
+  # Letzte Anpassung: 20.05.2023
+  after_alarm:
+    name: "After Alarm Zeit"
+    icon: mdi:alarm
+    has_date: true
+    has_time: true
+    
+    
+  # Kategorie: Input_Datetime
+  # Name: Letzte Reinigung
+  # Beschreibung: Datum der letzten Reinigung
+  # Letzte Anpassung: 20.05.2023
+  letzte_reinigung:
+    name: "Letzte Reinigung"
+    icon: mdi:robot-vacuum
+    has_date: true
+    has_time: false
+
+###############################################
+###              INPUT_BOOLEAN              ###
+###############################################
+
 input_boolean:
 
-  ## [Input_Boolean] Alarm On/Off
-  ## Aktivierung oder Deaktivierung des Alarms
+  # Kategorie: Input_Boolean
+  # Name: Alarm On/Off
+  # Beschreibung: Aktivierung oder Deaktivierung des Alarms
+  # Letzte Anpassung: 20.05.2023
   alarm_switch:
     name: "Alarm Ein/Ausschalten"
     icon: mdi:alarm
+
+  # Kategorie: Input_Boolean
+  # Name: Heute gestaubsaugt (länger als 10 min)
+  # Beschreibung: Wird durch eine Automation automatisch ON geschaltet
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_heute_gestaubsaugt:
+    name: "Heute gestaubsaugt (länger als 10 min)"
+    icon: mdi:robot-vacuum
+
+  # Kategorie: Input_Boolean
+  # Name: Staubsauger Behälter entleeren
+  # Beschreibung: Wird durch eine Automation automatisch ON geschaltet - OFF Manuell nach Entleerung manuell
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_entleeren:
+    name: "Staubsauber Behäter entleeren"
+    icon: mdi:trash-can
+
+  # Kategorie: Input_Boolean
+  # Name: Staubsauger Hauptbürste reinigen
+  # Beschreibung: -
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_hauptbuerste:
+    name: "Staubsauber Hauptbürste reinigen"
+    icon: mdi:robot-vacuum-alert
+
+  # Kategorie: Input_Boolean
+  # Name: Staubsauger Seiten reinigen
+  # Beschreibung: -
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_seitenbuerste:
+    name: "Staubsauber Seiten reinigen"
+    icon: mdi:robot-vacuum-alert 
+
+  # Kategorie: Input_Boolean
+  # Name: Staubsauger Filter reinigen
+  # Beschreibung: -
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_filter:
+    name: "Staubsauber Filter reinigen"
+    icon: mdi:robot-vacuum-alert
+
+  # Kategorie: Input_Boolean
+  # Name: Staubsauger Kamera-Sensoren reinigen
+  # Beschreibung: -
+  # Letzte Anpassung: 20.05.2023
+  staubsauger_kamerasensoren:
+    name: "Staubsauber kamerasensoren reinigen"
+    icon: mdi:robot-vacuum-alert

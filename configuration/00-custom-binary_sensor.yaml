@@ -12,22 +12,26 @@
 ## Synology Diskstation DS214play
 - platform: ping
   host: !secret ip_diskstation
-  name: "Diskstation"
+  name: "Diskstation-Ping"
   count: 2
-  scan_interval: 15
+  scan_interval: 30
  
 # ---- Template-Plattform 
 - platform: template
   sensors:
 
-    ## [Allgemein] Anwesenheitserkennung
-    ## True, wenn keiner Zuhause ist
+    # Kategorie: Allgemein
+    # Name: Jemand Zuhause
+    # Beschreibung: Gibt "True" zurück, wenn niemand zuhause ist.
+    # Letzte Anpassung: 20.05.2023
     anwesend:
       friendly_name: "Jemand Zuhause"
       value_template: "{{is_state('person.erik','home')}}"
 
-    ## [Staubsauger] Heute noch nicht gereinigt
-    ## True, wenn heute noch nicht gereinigt wurde (auch keine kurze Küchenreinigung)
+    # Kategorie: Staubsaugen
+    # Name: Heute Reinigung notwendig
+    # Beschreibung: Gibt "True" zurück, wenn heute noch keine Reinigung erfolgt ist (einschließlich kurzer Küchenreinigung).
+    # Letzte Anpassung: 20.05.2023
     staubsauger_heute_reinigung_notwendig:
       friendly_name: "Heute Reinigung notwendig"
       icon_template: >-
@@ -35,16 +39,20 @@
         {% else %} mdi:circle-outline
         {% endif %}      
       value_template: >-
-        {% set letzte_reinigung = as_timestamp(states('sensor.roborock_vacuum_a10_last_clean_start')) | timestamp_custom('%d.%m.%Y') %}
-        {% set automatische_reinigung =  as_timestamp(state_attr('automation.staubsaugen','last_triggered')) | timestamp_custom('%d.%m.%Y') %}
+        {% set letzte_reinigung = as_timestamp(states('sensor.roborock_s6_maxv_last_clean_start')) | timestamp_custom('%d.%m.%Y') %}
         {% set heute = as_timestamp(now()) | timestamp_custom('%d.%m.%Y') %}
-        {% if letzte_reinigung != heute %} {{ true }}
-        {% elif automatische_reinigung != heute %} {{ true }}
+        {% set dauer = (states('sensor.roborock_s6_maxv_current_clean_duration') | int / 60) | round(0) %}
+        {% set schalter = states('input_boolean.staubsauger_heute_gestaubsaugt') %}
+        
+        {% if letzte_reinigung != heute %} {{ true }} 
+        {% elif letzte_reinigung == heute and schalter == "off" %} {{ true }} 
         {% else %} {{ false }}
         {% endif %}
-
-    ## [Staubsauger] Staubbehälter entleeren
-    ## True, wenn 'Anzahl der Gesamtreinigungen' / '(Helfer) Nach Reinigungen leeren' = Rest 0
+                
+    # Kategorie: Staubsaugen
+    # Name: Behälter entleeren
+    # Beschreibung: Gibt "True" zurück, wenn der Staubbehälter entleert werden muss.
+    # Letzte Anpassung: 20.05.2023
     staubsauger_entleeren:
       friendly_name: "Behälter entleeren"
       icon_template: >-
@@ -52,13 +60,15 @@
         {% else %} mdi:circle-outline
         {% endif %}         
       value_template: >-
-        {% set rest = states('sensor.roborock_vacuum_a10_total_clean_count') | int % states('input_number.staubsauger_entleeren') | int %}
+        {% set rest = states('sensor.roborock_s6_maxv_total_clean_count') | int % states('input_number.staubsauger_entleeren') | int %}
         {% if rest == 0 %} {{ true }}
         {% else %} {{ false }}
         {% endif %}
 
-    ## [Staubsauger] Zwangsreinigung
-    ## True, wenn letzte Reinigung in Tagen zu lange zurück liegt
+    # Kategorie: Staubsaugen
+    # Name: Zwangsreinigung
+    # Beschreibung: Gibt "True" zurück, wenn die letzte Reinigung zu lange zurückliegt.
+    # Letzte Anpassung: 20.05.2023
     staubsauger_zwangsreinigung:
       friendly_name: "Zwangsreinigung"
       icon_template: >-
@@ -66,15 +76,17 @@
         {% else %} mdi:circle-outline
         {% endif %} 
       value_template: >-              
-        {% set letzte_reinigung = states('sensor.roborock_vacuum_a10_last_clean_start') %}
+        {% set letzte_reinigung = states('sensor.roborock_s6_maxv_last_clean_start') %}
         {% set zwangsreinigung = states('input_number.nach_tagen_reinigen') | int %}
         {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
         {% if zwangsreinigung <= now() %} {{ true }}
         {% else %} {{ false }}
         {% endif %} 
 
-    ## [Licht] Bewegung erkannt
-    ## True, wenn bei einem von zwei Sensoren im Flur Bewegung erkannt wurde
+    # Kategorie: Licht
+    # Name: Flur Bewegung erkannt [ODER-FUNKTION]
+    # Beschreibung: Gibt "True" zurück, wenn einer von zwei Sensoren im Flur Bewegung erkannt hat.
+    # Letzte Anpassung: 20.05.2023
     flur_bewegung_erkannt:
       friendly_name: "Flur Bewegung erkannt [ODER-FUNKTION]"
       icon_template: >-
@@ -88,7 +100,10 @@
         {% else %} {{false}}
         {% endif %}
 
-    ## [Licht] Keine Bewegung den zwei Sensoren im Flur keine Bewegung erkannt wurde
+    # Kategorie: Licht
+    # Name: Flur keine Bewegung mehr erkannt [UND-FUNKTION]
+    # Beschreibung: Gibt "True" zurück, wenn beide Sensoren im Flur keine Bewegung erkannt haben.
+    # Letzte Anpassung: 20.05.2023
     flur_keine_bewegung_erkannt:
       friendly_name: "Flur keine Bewegung mehr erkannt [UND-FUNKTION]"
       icon_template: >-
@@ -99,5 +114,81 @@
         {% set A = states('binary_sensor.flur_2_motion_2')  %}
         {% set B = states('binary_sensor.flur_motion')  %}
         {% if A == "off" and B == "off" %} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+        ## [Staubsauger] Sensoren reinigen
+
+    # Kategorie: Staubsaugen
+    # Name: Staubsauger Behälter entleeren
+    # Beschreibung: Gibt "True" zurück, wenn die Anzahl der Reinigungen den Schwellenwert für das Behälterentleeren überschritten hat.
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_behaelter_entleeren:
+      friendly_name: "Staubsauger Behälter entleeren"
+      value_template: >-
+        {% if states('counter.reinigung') | int >= states('input_number.staubsauger_entleeren') | int %} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    # Kategorie: Staubsaugen
+    # Name: Sensoren reinigen notwendig
+    # Beschreibung: Gibt "True" zurück, wenn einer der Sensoren für den Staubsauger gereinigt werden muss (Hauptbürste, Seitenbürste, Filter, Kamera-Sensoren).
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_alle_sensoren:
+      friendly_name: "Sensoren reinigen notwendig"
+      icon_template: mdi:robot-vacuum-alert
+      value_template: >-
+        {% set A = states('binary_sensor.staubsauger_hauptbuerste') %}
+        {% set B = states('binary_sensor.staubsauger_seitenbuerste') %}
+        {% set C = states('binary_sensor.staubsauger_filter') %}
+        {% set D = states('binary_sensor.staubsauger_kamerasensoren') %}
+        {% if A == "on" or B == "on" or C == "on" or D == "on" %} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    # Kategorie: Staubsaugen
+    # Name: Staubsauger Hauptbürste
+    # Beschreibung: Gibt "True" zurück, wenn die Hauptbürste des Staubsaugers gereinigt werden muss.
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_hauptbuerste:
+      friendly_name: "Staubsauger Hauptbürste"
+      icon_template: mdi:robot-vacuum-alert
+      value_template: >-
+        {% if (states('sensor.roborock_s6_maxv_main_brush_left') | int) < 0%} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    # Kategorie: Staubsaugen
+    # Name: Staubsauger Seitenbürste
+    # Beschreibung: Gibt "True" zurück, wenn die Seitenbürste des Staubsaugers gereinigt werden muss.
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_seitenbuerste:
+      friendly_name: "Staubsauger Seitenbürste"
+      icon_template: mdi:robot-vacuum-alert
+      value_template: >-
+        {% if (states('sensor.roborock_s6_maxv_side_brush_left') | int) < 0%} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    # Kategorie: Staubsaugen
+    # Name: Staubsauger Filter
+    # Beschreibung: Gibt "True" zurück, wenn der Filter des Staubsaugers gereinigt werden muss.
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_filter:
+      friendly_name: "Staubsauger Filter"
+      icon_template: mdi:robot-vacuum-alert
+      value_template: >-
+        {% if (states('sensor.roborock_s6_maxv_filter_left') | int) < 0%} {{true}}
+        {% else %} {{false}}
+        {% endif %}
+
+    # Kategorie: Staubsaugen
+    # Name: Staubsauger Kamera-Sensoren
+    # Beschreibung: Gibt "True" zurück, wenn die Kamera-Sensoren des Staubsaugers gereinigt werden müssen.
+    # Letzte Anpassung: 20.05.2023
+    staubsauger_kamerasensoren:
+      friendly_name: "Staubsauger Kamera-Sensoren"
+      icon_template: mdi:robot-vacuum-alert
+      value_template: >-
+        {% if (states('sensor.roborock_s6_maxv_sensor_dirty_left') | int) < 0%} {{true}}
         {% else %} {{false}}
         {% endif %}
