@@ -1,4 +1,4 @@
-alias: Monatliches Backup
+alias: Homeassistant Backup
 description: ''
 trigger:
 - platform: state

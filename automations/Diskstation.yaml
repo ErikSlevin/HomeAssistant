@@ -5,32 +5,58 @@ trigger:
   entity_id:
   - schedule.diskstation
   attribute: next_event
+  id: Zeitplan
+- platform: time
+  at: 01:30:00
+  id: Shutdown
 condition: []
 action:
-- if:
-  - condition: state
-    entity_id: binary_sensor.diskstation_ping
-    state: 'off'
-  then:
-  - service: wake_on_lan.send_magic_packet
-    data:
-      broadcast_port: 9
-      mac: 00-11-32-37-46-98
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.diskstation_ping
-      to: 'on'
-    continue_on_timeout: true
-    timeout:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-  else:
-  - service: button.press
-    data: {}
-    target:
-      entity_id: button.diskstation_shutdown
+- choose:
+  - conditions:
+    - condition: trigger
+      id: Zeitplan
+    sequence:
+    - if:
+      - condition: state
+        entity_id: binary_sensor.diskstation_ping
+        state: 'off'
+      then:
+      - service: wake_on_lan.send_magic_packet
+        data:
+          broadcast_port: 9
+          mac: 00-11-32-37-46-98
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.diskstation_ping
+          to: 'on'
+        continue_on_timeout: true
+        timeout:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      else:
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.diskstation_shutdown
+  - conditions:
+    - condition: trigger
+      id: Shutdown
+    - condition: state
+      entity_id: binary_sensor.diskstation_ping
+      state: 'on'
+    sequence:
+    - service: button.press
+      data: {}
+      target:
+        entity_id: button.diskstation_shutdown
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - binary_sensor.diskstation_ping
+        from: 'on'
+        to: 'off'
 mode: single
 

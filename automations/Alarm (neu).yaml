@@ -87,17 +87,17 @@ action:
           to: 'on'
           from: 'off'
   enabled: false
-- wait_for_trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.flur_bewegung_erkannt
 - service: media_player.volume_set
   data:
-    volume_level: 0.4
+    volume_level: 0.43
   target:
     entity_id:
     - media_player.wohnzimmer
     - media_player.schlafzimmer
+- wait_for_trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.flur_bewegung_erkannt
 - service: media_player.play_media
   target:
     entity_id: media_player.allen_lautsprechern

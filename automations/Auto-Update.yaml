@@ -4,53 +4,6 @@ trigger:
 - platform: state
   entity_id:
   - update.home_assistant_core_update
-  attribute: latest_version
-  id: Core
-  enabled: false
-- platform: state
-  entity_id:
-  - update.home_assistant_operating_system_update
-  attribute: latest_version
-  id: ' Operating System Update'
-  enabled: false
-- platform: state
-  entity_id:
-  - update.home_assistant_supervisor_update
-  attribute: latest_version
-  id: Supervisor
-  enabled: false
-- platform: state
-  entity_id:
-  - update.file_editor_update
-  attribute: latest_version
-  id: File
-  enabled: false
-- platform: state
-  entity_id:
-  - update.terminal_ssh_update
-  attribute: latest_version
-  id: SSH
-  enabled: false
-- platform: state
-  entity_id:
-  - update.samba_backup_update
-  attribute: latest_version
-  id: SAMBA
-  enabled: false
-- platform: state
-  entity_id:
-  - update.samba_backup_update
-  attribute: latest_version
-  id: Samba-Backup
-  enabled: false
-- platform: template
-  value_template: "{% set repositories = state_attr('sensor.hacs', 'repositories')
-    %}\n{% if repositories %}\n  true\n{% else %}\n  false\n{% endif %}"
-  id: HACS
-  enabled: false
-- platform: state
-  entity_id:
-  - update.home_assistant_core_update
   - update.home_assistant_operating_system_update
   - update.home_assistant_supervisor_update
 condition: []
@@ -59,89 +12,15 @@ action:
   - platform: time
     at: 03:00:00
   continue_on_timeout: false
-  enabled: false
-- choose:
-  - conditions:
-    - condition: trigger
-      id: Core
-    sequence:
-    - service: update.install
-      data: {}
-      target:
-        entity_id: update.home_assistant_core_update
-  - conditions:
-    - condition: trigger
-      id: ' Operating System Update'
-    sequence:
-    - service: update.install
-      data: {}
-      target:
-        entity_id: update.home_assistant_operating_system_update
-  - conditions:
-    - condition: trigger
-      id: Supervisor
-    sequence:
-    - service: update.install
-      data: {}
-      target:
-        entity_id: update.home_assistant_supervisor_update
-  - conditions:
-    - condition: trigger
-      id: File
-    sequence:
-    - service: hassio.addon_update
-      data:
-        addon: core_configurator
-  - conditions:
-    - condition: trigger
-      id: SSH
-    sequence:
-    - service: hassio.addon_update
-      data:
-        addon: core_ssh
-  - conditions:
-    - condition: trigger
-      id: SAMBA
-    sequence:
-    - service: hassio.addon_update
-      data:
-        addon: 15d21743_samba_backup
-  - conditions:
-    - condition: trigger
-      id: Samba-Backup
-    sequence:
-    - service: hassio.addon_update
-      data:
-        addon: 15d21743_samba_backup
-  enabled: false
-- if:
-  - condition: template
-    value_template: '{{trigger.id == "HACS" }}'
-  then:
-  - service: notify.gotify
-    data:
-      title: Homeassistent - {{trigger.id}}
-      message: HACS Update verfügbar  {% set repositories = state_attr('sensor.hacs',
-        'repositories') %} {% for repository in repositories %} {{ repository['display_name']
-        }} ({{ repository['installed_version'] }} / {{ repository['available_version']
-        }}) {% endfor %}
-  else:
-  - service: notify.gotify
-    data:
-      message: Update wurde ausgeführt
-      title: Homeassistent - {{trigger.id}}
-  enabled: false
-- service: update.install
-  target:
-    entity_id: '{{ trigger.to_state.entity_id }}'
-  enabled: false
+  enabled: true
 - service: update.install
   data: {}
   target:
-    entity_id: '{{ states.update | selectattr(''state'',''eq'',''on'') | map(attribute=''entity_id'')
-      | list }}
-
-      '
+    entity_id: all
+- service: notify.gotify
+  data:
+    message: '{{ trigger.entity_id }} Update wurde ausgeführt'
+    title: Homeassistent
 mode: parallel
 max: 10
 
