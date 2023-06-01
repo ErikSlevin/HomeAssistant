@@ -125,7 +125,7 @@
       unit_of_measurement: '°C'
       value_template: "{{state_attr('climate.buro','temperature') }}"
 
-    # Kategorie: Staubsauger
+    # Kategorie: Staubsaugen
     # Name: Sensoren reinigen
     # Beschreibung: False, wenn kein Sensor gereinigt werden muss. Gibt den jeweiligen Sensor als String zurück, wenn Reinigung notwendig
     # Letzte Anpassung: 20.05.2023
@@ -145,7 +145,7 @@
         {% elif sen < 0 %} Sensoren reinigen {{(sen/3600)|int}}/30 Stunden - Sensor wird zurück gesetzt.
         {% endif %}
 
-    # Kategorie: Staubsauger
+    # Kategorie: Staubsaugen
     # Name: Staubbehälter leeren (Datum)
     # Beschreibung: Gibt das Datum zurück, wann der Behälter entleert werden muss, wenn täglich gereinigt wird
     # Letzte Anpassung: 20.05.2023
@@ -158,7 +158,7 @@
        {% set entleerung = as_datetime(letzte_reinigung) + timedelta(days=entleerung) %}
        {{ entleerung.strftime('%d.%m.%Y') }}
 
-    # Kategorie: Staubsauger
+    # Kategorie: Staubsaugen
     # Name: Nächste Reinigung (Datum)
     # Beschreibung: Gibt das Datum zurück, wann die nächste Reinigung ansteht
     # Letzte Anpassung: 20.05.2023
@@ -171,7 +171,7 @@
         {% set zwangsreinigung = as_datetime(letzte_reinigung) + timedelta(days=zwangsreinigung) %}
         {{ zwangsreinigung.strftime('%d.%m.%Y') }}
 
-    # Kategorie: Staubsauger
+    # Kategorie: Staubsaugen
     # Name: Wieviel Reinigungen bis Entleerung
     # Beschreibung: -
     # Letzte Anpassung: 20.05.2023

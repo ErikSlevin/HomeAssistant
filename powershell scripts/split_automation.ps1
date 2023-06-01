@@ -1,5 +1,5 @@
 # Definiere den Pfad zur Quelldatei
-$sourceFile = "\\10.0.0.59\config\automations.yaml"
+$sourceFile = "\\homeassistant\config\automations.yaml"
 # Definiere den Zielordner für die aufgespaltenen Dateien
 $targetFolder = "$env:USERPROFILE\Desktop\Automationen"
 

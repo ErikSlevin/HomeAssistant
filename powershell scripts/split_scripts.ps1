@@ -1,5 +1,5 @@
 # Definiere den Pfad zur Quelldatei
-$sourceFile = "\\10.0.0.59\config\scripts.yaml"
+$sourceFile = "\\homeassistant\config\scripts.yaml"
 # Definiere den Zielordner für die aufgespaltenen Dateien
 $targetFolder = "$env:USERPROFILE\Desktop\Scripts"
 
